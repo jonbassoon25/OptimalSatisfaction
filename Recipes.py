@@ -415,7 +415,19 @@ class Steeled_Frame(Recipe):
 	inputs = {"Reinforced Iron Plate": 2, "Steel Pipe": 10}
 	outputs = {"Modular Frame": 3}
 
+class Smart_Plating(Recipe):
+	production_machine = PMs.Assembler
+	inputs = {"Reinforced Iron Plate": 2, "Rotor": 2}
+	outputs = {"Smart Plating": 2}
+class Plastic_Smart_Plating(Recipe):
+	production_machine = PMs.Manufacturer
+	inputs = {"Reinforced Iron Plate": 2.5, "Rotor": 2.5, "Plastic": 7.5}
+	outputs = {"Smart Plating": 5}
 
+class Solid_Biofuel(Recipe):
+	production_machine = PMs.Constructor
+	inputs = {"Biomass": 120}
+	outputs = {"Solid Biofuel": 60}
 
 #-----Incomplete-----#
 

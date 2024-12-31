@@ -97,7 +97,7 @@ class Portable_Miner(Item):
 	alternate_recipes = [Recipes.Portable_Miner]
 	sink_yield = 56
 
-#Tier 0 & 1 Items
+#Tier 0 & 1 & 2 Items
 class Iron_Ingot(Item):
 	name = "Iron Ingot"
 	default_recipes = [Recipes.Iron_Ingot]
@@ -172,9 +172,21 @@ class Rotor(Item):
 
 class Modular_Frame(Item):
 	name = "Modular Frame"
-	default_recipes = []
-	alternate_recipes = []
+	default_recipes = [Recipes.Modular_Frame]
+	alternate_recipes = [Recipes.Bolted_Frame, Recipes.Steeled_Frame]
 	sink_yield = 408
+
+class Smart_Plating(Item):
+	name = "Smart Plating"
+	default_recipes = [Recipes.Smart_Plating]
+	alternate_recipes = [Recipes.Plastic_Smart_Plating]
+	sink_yield = 520
+
+class Solid_Biofuel(Item):
+	name = "Solid Biofuel"
+	default_recipes = [Recipes.Solid_Biofuel]
+	sink_yield = 48
+	
 
 resources = [ret[1] for ret in inspect.getmembers(sys.modules[__name__], inspect.isclass)] #Get list of all resource classes
 def get_item_by_name(item_name):

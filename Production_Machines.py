@@ -187,4 +187,13 @@ class Refinery(Production_Machine):
 		"Copper Sheet": 20
 	}
 
+class Manufacturer(Production_Machine):
+	maximum_power_draw = 55
+	total_somersloop_slots = 4
 
+	construction_requirements = {
+		"Motor": 10,
+		"Modular Frame": 20,
+		"Plastic": 50,
+		"Cable": 50
+	}
