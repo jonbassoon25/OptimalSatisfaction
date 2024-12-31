@@ -131,14 +131,6 @@ class Converter(Production_Machine):
 		"SAM Fluctuator": 100
 	}
 
-class Constructor(Production_Machine):
-	maximum_power_draw = 4
-
-	construction_requirements = {
-		"Reinforced Iron Plate": 2,
-		"Cable": 8
-	}
-
 class Packager(Production_Machine):
 	maximum_power_draw = 10
 
@@ -147,3 +139,52 @@ class Packager(Production_Machine):
 		"Rubber": 10,
 		"Plastic": 10
 	}
+
+class Constructor(Production_Machine):
+	maximum_power_draw = 4
+
+	construction_requirements = {
+		"Reinforced Iron Plate": 2,
+		"Cable": 8
+	}
+
+class Assembler(Production_Machine):
+	maximum_power_draw = 15
+	total_somersloop_slots = 2
+
+	construction_requirements = {
+		"Reinforced Iron Plate": 8,
+		"Rotor": 4,
+		"Cable": 10
+	}
+
+class Smelter(Production_Machine):
+	maximum_power_draw = 4
+
+	construction_requirements = {
+		"Iron Rod": 5,
+		"Wire": 8
+	}
+
+class Foundry(Production_Machine):
+	maximum_power_draw = 16
+	total_somersloop_slots = 2
+
+	construction_requirements = {
+		"Modular Frame": 10,
+		"Rotor": 10,
+		"Concrete": 20
+	}
+
+class Refinery(Production_Machine):
+	maximum_power_draw = 30
+	total_somersloop_slots = 2
+
+	construction_requirements = {
+		"Motor": 10,
+		"Encased Industrial Beam": 10,
+		"Steel Pipe": 30,
+		"Copper Sheet": 20
+	}
+
+
