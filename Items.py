@@ -77,7 +77,23 @@ class Water(Item):
 	alternate_recipes = [Recipes.Distilled_Silica, Recipes.Electrode_Aluminum_Scrap, Recipes.Fertile_Uranium, Recipes.Instant_Scrap]
 	sink_yield = None
 
+#Player-Collected Biomass
+class Alien_Remains(Item):
+	name = "Alien Remains"
 
+class Leaves(Item):
+	name = "Leaves"
+	sink_yield = 3
+
+class Wood(Item):
+	name = "Wood"
+	sink_yield = 30
+
+class Mycelia(Item):
+	name = "Mycelia"
+	sink_yield = 10
+
+#Stage 1 Items
 
 
 resources = [ret[1] for ret in inspect.getmembers(sys.modules[__name__], inspect.isclass)] #Get list of all resource classes
