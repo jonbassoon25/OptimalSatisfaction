@@ -9,6 +9,8 @@ class Item:
 	alternate_recipes = []
 	sink_yield = None
 
+
+
 #Raw Resources
 class Iron_Ore(Item):
 	name = "Iron Ore"
@@ -74,6 +76,8 @@ class Water(Item):
 	default_recipes = [Recipes.Water, Recipes.Unpackage_Water, Recipes.Aluminum_Scrap, Recipes.Battery, Recipes.Non_Fissile_Uranium]
 	alternate_recipes = [Recipes.Distilled_Silica, Recipes.Electrode_Aluminum_Scrap, Recipes.Fertile_Uranium, Recipes.Instant_Scrap]
 
+
+
 #Player-Collected Biomass
 class Alien_Remains(Item):
 	name = "Alien Remains"
@@ -90,12 +94,16 @@ class Mycelia(Item):
 	name = "Mycelia"
 	sink_yield = 10
 
+
+
 #Player Crafted Items (that are used in construction / production)
 class Portable_Miner(Item):
 	name = "Portable Miner"
 	default_recipes = []
 	alternate_recipes = [Recipes.Portable_Miner]
 	sink_yield = 56
+
+
 
 #Tier 0 & 1 & 2 Items
 class Iron_Ingot(Item):
@@ -186,7 +194,103 @@ class Solid_Biofuel(Item):
 	name = "Solid Biofuel"
 	default_recipes = [Recipes.Solid_Biofuel]
 	sink_yield = 48
-	
+
+
+
+#Tier 3 & 4 Items
+class Steel_Ingot(Item):
+	name = "Steel Ingot"
+	default_recipes = [Recipes.Steel_Ingot]
+	alternate_recipes = [Recipes.Coke_Steel_Ingot, Recipes.Compacted_Steel_Ingot, Recipes.Solid_Steel_Ingot]
+	sink_yield = 8
+
+class Steel_Beam(Item):
+	name = "Steel Beam"
+	default_recipes = [Recipes.Steel_Beam]
+	alternate_recipes = [Recipes.Alternate_Beam, Recipes.Molded_Beam]
+	sink_yield = 64
+
+class Steel_Pipe(Item):
+	name = "Steel Pipe"
+	default_recipes = [Recipes.Steel_Pipe]
+	alternate_recipes = [Recipes.Iron_Pipe, Recipes.Molded_Steel_Pipe]
+	sink_yield = 24
+
+class Versatile_Framework(Item):
+	name = "Versatile Framework"
+	default_recipes = [Recipes.Versatile_Framework]
+	alternate_recipes = [Recipes.Flexible_Framework]
+	sink_yield = 1176
+
+class Encased_Industrial_Beam(Item):
+	name  = "Encased Industrial Beam"
+	default_recipes = [Recipes.Encased_Industrial_Beam]
+	alternate_recipes = [Recipes.Encased_Industrial_Pipe]
+	sink_yield = 528
+
+class Stator(Item):
+	name = "Stator"
+	default_recipes = [Recipes.Stator]
+	alternate_recipes = [Recipes.Quickwire_Stator]
+	sink_yield = 240
+
+class Motor(Item):
+	name = "Motor"
+	default_recipes = [Recipes.Motor]
+	alternate_recipes = [Recipes.Electric_Motor, Recipes.Rigor_Motor]
+	sink_yield = 1520
+
+class Automated_Wiring(Item):
+	name = "Automated Wiring"
+	default_recipes = [Recipes.Automated_Wiring]
+	alternate_recipes = [Recipes.Automated_Speed_Wiring]
+	sink_yield = 1440
+
+class Plastic(Item):
+	name = "Plastic"
+	default_recipes = [Recipes.Plastic, Recipes.Residual_Plastic]
+	alternate_recipes = [Recipes.Recycled_Plastic]
+	sink_yield = 75
+
+class Rubber(Item):
+	name = "Rubber"
+	default_recipes = [Recipes.Rubber, Recipes.Residual_Rubber]
+	alternate_recipes = [Recipes.Recycled_Rubber]
+	sink_yield = 60
+
+class Fuel(Item):
+	name = "Fuel"
+	default_recipes = [Recipes.Fuel, Recipes.Residual_Fuel, Recipes.Unpackage_Fuel]
+	alternate_recipes = [Recipes.Diluted_Fuel]
+
+class Heavy_Oil_Residue(Item):
+	name = "Heavy Oil Residue"
+	default_recipes = [Recipes.Unpackage_Heavy_Oil_Residue, Recipes.Plastic, Recipes.Rubber]
+	alternate_recipes = [Recipes.Heavy_Oil_Residue, Recipes.Polymer_Resin]
+
+class Polymer_Resin(Item):
+	name = "Polymer Resin"
+	default_recipes = [Recipes.Fuel]
+	alternate_recipes = [Recipes.Heavy_Oil_Residue, Recipes.Polymer_Resin]
+	sink_yield = 12
+
+class Petroleum_Coke(Item):
+	name = "Petroleum Coke"
+	default_recipes = [Recipes.Petroleum_Coke]
+	sink_yield = 20
+
+class Circuit_Board(Item):
+	name = "Circuit Board"
+	default_recipes = [Recipes.Circuit_Board]
+	alternate_recipes = [Recipes.Caterium_Circuit_Board, Recipes.Electrode_Circuit_Board, Recipes.Silicon_Circuit_Board]
+	sink_yield = 696
+
+class Empty_Canister(Item):
+	name = "Empty Canister"
+	default_recipes = []
+	alternate_recipes = []
+	sink_yield = 60
+
 
 resources = [ret[1] for ret in inspect.getmembers(sys.modules[__name__], inspect.isclass)] #Get list of all resource classes
 def get_item_by_name(item_name):

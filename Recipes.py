@@ -429,6 +429,193 @@ class Solid_Biofuel(Recipe):
 	inputs = {"Biomass": 120}
 	outputs = {"Solid Biofuel": 60}
 
+class Steel_Ingot(Recipe):
+	production_machine = PMs.Foundry
+	inputs = {"Iron Ore": 45, "Coal": 45}
+	outputs = {"Steel Ingot": 45}
+class Coke_Steel_Ingot(Recipe):
+	production_machine = PMs.Foundry
+	inputs = {"Iron Ore": 75, "Petroleum Coke": 75}
+	outputs = {"Steel Ingot": 100}
+class Compacted_Steel_Ingot(Recipe):
+	production_machine = PMs.Foundry
+	inputs = {"Iron Ore": 5, "Compacted Coal": 2.5}
+	outputs = {"Steel Ingot": 10}
+class Solid_Steel_Ingot(Recipe):
+	production_machine = PMs.Foundry
+	inputs = {"Iron Ingot": 40, "coal": 40}
+	outputs = {"Steel Ingot": 60}
+
+class Steel_Beam(Recipe):
+	production_machine = PMs.Constructor
+	inputs = {"Steel Ingot": 60}
+	outputs = {"Steel Beam": 15}
+class Alternate_Beam(Recipe):
+	production_machine = PMs.Constructor
+	inputs = {"Aluminum Ingot": 22.5}
+	outputs = {"Steel Beam": 22.5}
+class Molded_Beam(Recipe):
+	production_machine = PMs.Foundry
+	inputs = {"Steel Ingot": 120, "Concrete": 80}
+	outputs = {"Steel Beam": 45}
+
+class Steel_Pipe(Recipe):
+	production_machine = PMs.Constructor
+	inputs = {"Steel Ingot": 30}
+	outputs = {"Steel Pipe": 20}
+class Iron_Pipe(Recipe):
+	production_machine = PMs.Constructor
+	inputs = {"Iron Ingot": 100}
+	outputs = {"Steel Pipe": 25}
+class Molded_Steel_Pipe(Recipe):
+	production_machine = PMs.Foundry
+	inputs = {"Steel Ingot": 50, "Concrete": 30}
+	outputs = {"Steel Pipe": 50}
+
+class Versatile_Framework(Recipe):
+	production_machine = PMs.Assembler
+	inputs = {"Modular Frame": 2.5, "Steel Beam": 30}
+	outputs = {"Versatile Framework": 5}
+class Flexible_Framework(Recipe):
+	production_machine = PMs.Manufacturer
+	inputs = {"Modular Frame": 3.75, "Steel Beam": 22.5, "Rubber": 30}
+	outputs = {"Versatile Framework": 7.5}
+
+class Encased_Industrial_Beam(Recipe):
+	production_machine = PMs.Assembler
+	inputs = {"Steel Beam": 18, "Concrete": 36}
+	outputs = {"Encased Industrial Beam": 6}
+class Encased_Industrial_Pipe(Recipe):
+	production_machine = PMs.Assembler
+	inputs = {"Steel Pipe": 24, "Concrete": 20}
+	outputs = {"Encased Industrial Beam": 4}
+
+class Stator(Recipe):
+	production_machine = PMs.Assembler
+	inputs = {"Steel Pipe": 15, "Wire": 40}
+	outputs = {"Stator": 5}
+class Quickwire_Stator(Recipe):
+	production_machine = PMs.Assembler
+	inputs = {"Steel Pipe": 16, "Quickwire": 60}
+	outputs = {"Stator": 8}
+
+class Motor(Recipe):
+	production_machine = PMs.Assembler
+	inputs = {"Rotor": 10, "Stator": 10}
+	outputs = {"Motor": 5}
+class Electric_Motor(Recipe):
+	production_machine = PMs.Assembler
+	inputs = {"Electromagnetic Control Rod": 3.75, "Rotor": 7.5}
+	outputs = {"Motor": 7.5}
+class Rigor_Motor(Recipe):
+	production_machine = PMs.Manufacturer
+	inputs = {"Rotor": 3.75, "Stator": 3.75, "Crystal Oscillator": 1.25}
+	outputs = {"Motor": 7.5}
+
+class Automated_Wiring(Recipe):
+	production_machine = PMs.Assembler
+	inputs = {"Stator": 2.5, "Cable": 50}
+	outputs = {"Automated Wiring": 2.5}
+class Automated_Speed_Wiring(Recipe):
+	production_machine = PMs.Manufacturer
+	inputs = {"Stator": 3.75, "Wire": 75, "High Spweed Connector": 1.875}
+	outputs = {"Automated Wiring": 7.5}
+
+class Plastic(Recipe):
+	production_machine = PMs.Refinery
+	inputs = {"Crude Oil": 30}
+	outputs = {"Plastic": 20, "Heavy Oil Residue": 10}
+class Residual_Plastic(Recipe):
+	production_machine = PMs.Refinery
+	inputs = {"Polymer Resin": 60, "Water": 20}
+	outputs = {"Plastic": 20}
+class Recycled_Plastic(Recipe):
+	production_machine = PMs.Refinery
+	inputs = {"Rubber": 30, "Fuel": 30}
+	outputs = {"Plastic": 60}
+
+class Rubber(Recipe):
+	production_machine = PMs.Refinery
+	inputs = {"Crude Oil": 30}
+	outputs = {"Rubber": 20, "Heavy Oil Residue": 20}
+class Residual_Rubber(Recipe):
+	production_machine = PMs.Refinery
+	inputs = {"Polymer Resin": 40, "Water": 40}
+	outputs = {"Rubber": 20}
+class Recycled_Rubber(Recipe):
+	production_machine = PMs.Refinery
+	inputs = {"Plastic": 30, "Fuel": 30}
+	outputs = {"Rubber": 60}
+
+class Fuel(Recipe):
+	production_machine = PMs.Refinery
+	inputs = {"Crude Oil": 60}
+	outputs = {"Fuel": 40, "Polymer Resin": 30}
+class Residual_Fuel(Recipe):
+	production_machine = PMs.Refinery
+	inputs = {"Heavy Oil Residue": 60}
+	outputs = {"Fuel": 40}
+class Unpackage_Fuel(Recipe):
+	production_machine = PMs.Packager
+	inputs = {"Packaged Fuel": 60}
+	outputs = {"Fuel": 60, "Empty Canister": 60}
+class Diluted_Fuel(Recipe):
+	production_machine = PMs.Blender
+	inputs = {"Heavy Oil Residue": 50, "Water": 100}
+	outputs = {"Fuel": 100}
+
+class Unpackage_Heavy_Oil_Residue(Recipe):
+	production_machine = PMs.Packager
+	inputs = {"Packaged Heavy Oil Residue": 20}
+	outputs = {"Heavy Oil Residue": 20, "Empty Canister": 20}
+class Heavy_Oil_Residue(Recipe):
+	production_machine = PMs.Refinery
+	inputs = {"Crude Oil": 30}
+	outputs = {"Heavy Oil Residue": 40, "Polymer Resin": 20}
+
+class Polymer_Resin(Recipe):
+	production_machine = PMs.Refinery
+	inputs = {"Crude Oil": 60}
+	outputs = {"Polymer Resin": 130, "Heavy Oil Residue": 20}
+
+class Petroleum_Coke(Recipe):
+	production_machine = PMs.Refinery
+	inputs = {"Heavy Oil Residue": 40}
+	outputs = {"Petroleum Coke": 120}
+
+class Circuit_Board(Recipe):
+	production_machine = PMs.Assembler
+	inputs = {"Copper Sheet": 15, "Plastic": 30}
+	outputs = {"Circuit Board": 7.5}
+class Caterium_Circuit_Board(Recipe):
+	production_machine = PMs.Assembler
+	inputs = {"Plastic": 12.5, "Quickwire": 37.5}
+	outputs = {"Circuit Board": 8.75}
+class Electrode_Circuit_Board(Recipe):
+	production_machine = PMs.Assembler
+	inputs = {"Rubber": 20, "Petroleum Coke": 40}
+	outputs = {"Circuit Board": 5}
+class Silicon_Circuit_Board(Recipe):
+	production_machine = PMs.Assembler
+	inputs = {"Copper Sheet": 27.5, "Silica": 27.5}
+	outputs = {"Circuit Board": 12.5}
+
+class Empty_Canister(Recipe):
+	production_machine = PMs.Constructor
+	inputs = {"Plastic": 30}
+	outputs = {"Empty Canister": 60}
+class Coated_Iron_Canister(Recipe):
+	production_machine = PMs.Assembler
+	inputs = {"Iron Plate": 30, "Copper Sheet": 15}
+	outputs = {"Empty Canister": 60}
+class Steel_Canister(Recipe):
+	production_machine = PMs.Constructor
+	inputs = {"Steel Ingot": 40}
+	outputs = {"Empty Canister": 40}
+
+
+
+
 #-----Incomplete-----#
 
 class Aluminum_Scrap(Recipe):

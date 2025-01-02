@@ -197,3 +197,14 @@ class Manufacturer(Production_Machine):
 		"Plastic": 50,
 		"Cable": 50
 	}
+
+class Blender(Production_Machine):
+	maximum_power_draw = 75
+	total_somersloop_slots = 4
+
+	construction_requirements = {
+		"Computer": 10,
+		"Heavy Modular Frame": 10,
+		"Motor": 20,
+		"Aluminum Casing": 50
+	}
