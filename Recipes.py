@@ -2,10 +2,21 @@
 import Production_Machines as PMs
 
 class Recipe:
+	quantity_multiplier = 1
 	production_machine = PMs.Production_Machine
 	inputs = {}
 	outputs = {}
-
+	
+	def __init__(self, quantity_multiplier = 1):
+		'''
+		Parameters:
+			quantity_produced (float): amount of times this recipe is produced
+		'''
+		self.quantity_multiplier = quantity_multiplier
+		for input in self.inputs.keys():
+			self.inputs[input] *= self.quantity_multiplier
+		for output in self.outputs.keys():
+			self.outputs[output] *= self.quantity_multiplier
 #Ores
 class Iron_Ore_MK1(Recipe):
 	production_machine = PMs.Resource_Miner_MK1
