@@ -22,6 +22,7 @@ def generate_production_tree(output_item, production_rate, default_only = True, 
 	#get the defualt production paths
 	#Build a tree that starts with each initial recipe and branches to each recipe of the initial recipe's input. Each branch of the tree should only use given inputs from its same branch
 	for recipe in recipes:
+		print(recipe.outputs)
 		recipe_quantity = production_rate / recipe.outputs[output_item.name]
 		recipe = recipe(recipe_quantity)
 		production_tree[recipe] = []
@@ -94,7 +95,7 @@ def get_outputs(production_branch):
 		
 	return outputs
 
-name = "Rotor"
+name = "Encased Industrial Beam"
 
 gpt = generate_production_tree(Items.get_item_by_name(name), 4)
 spt = split_production_tree(gpt)
@@ -106,7 +107,7 @@ for production_branch in spt:
 	print(get_inputs(production_branch))
 	print(get_outputs(production_branch))
 
-def generate_setup(output_item_name, production_rate, power_limit = -1, given_inputs = {}, resource_rate_limitations = {"SAM": 0}, construction_limitations = {"Power Shard": 0, "Somersloop": 0}):
+def generate_setup(output_item_name, production_rate, power_limit = -1, input_resources = {}, resource_rate_limitations = {"SAM": 0}, construction_limitations = {"Power Shard": 0, "Somersloop": 0}):
 	'''
 	Generates the production setup that meets the given requirements
 	'''

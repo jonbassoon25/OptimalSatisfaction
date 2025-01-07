@@ -343,7 +343,7 @@ class Quickwire_Cable(Recipe):
 class Concrete(Recipe):
 	production_machine = PMs.Constructor
 	inputs = {"Limestone": 45}
-	ouputs = {"Concrete": 15}
+	outputs = {"Concrete": 15}
 class Fine_Concrete(Recipe):
 	production_machine = PMs.Assembler
 	inputs = {"Silica": 15, "Limestone": 60}
