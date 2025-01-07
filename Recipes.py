@@ -1,4 +1,5 @@
 #Imports
+import Util
 import Production_Machines as PMs
 
 class Recipe:
@@ -12,11 +13,22 @@ class Recipe:
 		Parameters:
 			quantity_produced (float): amount of times this recipe is produced
 		'''
+		self.inputs = Util.copy_flat_dict(self.inputs)
+		self.outputs = Util.copy_flat_dict(self.outputs)
+
 		self.quantity_multiplier = quantity_multiplier
 		for input in self.inputs.keys():
 			self.inputs[input] *= self.quantity_multiplier
 		for output in self.outputs.keys():
 			self.outputs[output] *= self.quantity_multiplier
+
+class User_Provided_Resource(Recipe):
+	inputs = {}
+	outputs = {}
+
+	def __init__(self, outputs):
+		self.outputs = outputs
+
 #Ores
 class Iron_Ore_MK1(Recipe):
 	production_machine = PMs.Resource_Miner_MK1

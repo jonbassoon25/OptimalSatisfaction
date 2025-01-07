@@ -40,7 +40,10 @@ class Production_Machine:
 
 	def __init__(self, clock_speed = 1.0, filled_somersloop_slots = 0):
 		self.clock_speed = clock_speed
-		self.production_amplification_multiplier = 1 + round(filled_somersloop_slots / self.total_somersloop_slots, 2)
+		if self.total_somersloop_slots == 0:
+			self.production_amplification_multiplier = 1
+		else:
+			self.production_amplification_multiplier = 1 + round(filled_somersloop_slots / self.total_somersloop_slots, 2)
 
 		#Correct power draw for overclock
 		self.maximum_power_draw = round((self.clock_speed / 100) ** math.log2(2.5), 2)
