@@ -24,7 +24,7 @@ class Copper_Ore(Item):
 
 class Limestone(Item):
 	name = "Limestone"
-	default_recipes = [Recipes.Limestone_MK1, Recipes.Limestone_MK2] #Recipes.Limestone_MK3, Recipes.Limestone_SAM_S
+	default_recipes = [Recipes.Limestone_MK1, Recipes.Limestone_MK2, Recipes.Limestone_MK3] #Recipes.Limestone_SAM_S
 	sink_yield = 2
 
 class Coal(Item):
