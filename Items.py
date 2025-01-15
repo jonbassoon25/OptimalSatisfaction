@@ -296,6 +296,24 @@ class Reanimated_Sam(Item): #Not complete
 
 
 resources = [ret[1] for ret in inspect.getmembers(sys.modules[__name__], inspect.isclass)] #Get list of all resource classes
+#remove non-lookup classes
+resources.remove(Item)
+
+nautral_resources = []
+for resource in resources:
+	if resource.default_recipes == [] and resource.alternate_recipes == []:
+		nautral_resources.append(resource)
+
+semi_nautral_resources = []
+for resource in resources:
+	if resource.default_recipes == [] and resource.alternate_recipes != []:
+		semi_nautral_resources.append(resource)
+
+synthetic_resources = []
+for resource in resources:
+	if resource.default_recipes != []:
+		synthetic_resources.append(resource)
+
 def get_item_by_name(item_name):
 	for item in resources:
 		if item.name == item_name:

@@ -121,8 +121,8 @@ def get_outputs(production_branch):
 		
 	return outputs
 
-def generate_setup(output_item_name, production_rate, input_resources = {}, 
-				   order_of_importance = ["resource efficiency", "input resources", "construction cost", "energy consumption"], 
+def generate_setup(output_item_name, production_rate, miner_level, input_resources = {},
+				   order_of_importance = ["maximize resource efficiency", "use input resources", "minimize byproducts", "minimize construction cost", "minimize energy consumption"], 
 				   resource_rate_limitations = {"SAM": 0}, 
 				   construction_limitations = {"Power Shard": 0, "Somersloop": 0}
 		):
@@ -132,17 +132,17 @@ def generate_setup(output_item_name, production_rate, input_resources = {},
 	output_item = Items.get_item_by_name(output_item_name)
 
 	#construct all production trees using only default recipes
-	default_production_tree = generate_production_tree(output_item, production_rate, 2, True, input_resources)
+	default_production_tree = generate_production_tree(output_item, production_rate, miner_level, True, input_resources)
 
 	#construct all production trees using default and alternate recipes
-	#complete_production_tree = generate_production_tree(output_item, production_rate, False)
+	#complete_production_tree = generate_production_tree(output_item, production_rate, 2, False, input_resources)
 	complete_production_tree = {}
 
 	#When deciding which branch of a production tree to use, use the best recipe until it is not possible then the second best, and so on unil no recipes are possible or the resource requirement is fufilled
 
 if __name__ == "__main__":
-	item_name = "Automated Wiring"
-	quantity = 10 #per min
+	item_name = "Smart Plating"
+	quantity = 2000 #per min
 
 	gpt = generate_production_tree(Items.get_item_by_name(item_name), quantity, 1)
 	spt = split_production_tree(gpt)
