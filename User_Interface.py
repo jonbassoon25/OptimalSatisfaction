@@ -60,8 +60,6 @@ class Optimal_Satisfaction_UI:
 		input_resource_display = Display_Box(mainframe, root, text="Input Resources", content=[["test", 1], ["test2", 2]])
 		input_resource_display.grid(column=0, row=9, columnspan=2)
 
-		ttk.Button(mainframe, command=lambda: Item_Selection(root, self.input_resources), text="test").grid(column=0, row=10)
-
 		#ds = Drag_Sort(root, ["Hello", "World", "test", "test", "test"])
 		#ds.grid(column=0, row=5)
 	
@@ -147,6 +145,36 @@ class Item_Selection:
 		self.display_box.add_content([[self.item_list[self.item_listbox.curselection()[0]], int(self.production_rate_str.get())]])
 		self.display_box.validate_display_values()
 		self.destroy()
+	
+	def destroy(self):
+		self.root.destroy()
+	
+class Item_Deletion:
+	def __init__(self, root, display_box):
+		self.display_box = display_box
+
+		self.root = Toplevel(root)
+		root = self.root
+
+		root.title("Item Deletion")
+		root.resizable(False, False)
+
+		mainframe = ttk.Frame(root, padding="10 10")
+		mainframe.grid(column=0, row=0)
+
+		self.selection_listbox = Listbox(mainframe, height=7, listvariable=StringVar(value=[item[0] for item in self.display_box.get_content()]))
+		self.selection_listbox.grid(column=0,row=0)
+
+		remove = Button(mainframe, text="Delete", command=self.remove)
+		remove.grid(column=0, row=1)
+
+	def remove(self):
+		if len(self.selection_listbox.curselection()) == 0:
+			return
+		content = self.display_box.get_content()
+		del content[self.selection_listbox.curselection()[0]]
+		self.display_box.set_content(content)
+		self.destroy()
 
 	def destroy(self):
 		self.root.destroy()
@@ -164,17 +192,22 @@ class Display_Box(Frame):
 		self["borderwidth"] = 2
 		self["relief"] = "ridge"
 		self.content = content
-		Label(self, text=f"{text}:    ").grid(column=0, row=0)
+		Label(self, text=f"{text}:    ").grid(column=0, row=0, columnspan=2, sticky="W")
 
 		self.labels = []
 		self.set_content(content)
 
+		remove_button = Button(self, text="Delete Item", command=lambda: Item_Deletion(self.root, self))
+		remove_button.grid(column=0, row=255)
+
 		add_button = Button(self, text="Add Item", command=lambda: Item_Selection(self.root, self))
-		add_button.grid(column=0, row=255)
+		add_button.grid(column=1, row=255)
+
+		
 
 
 	def get_content(self):
-		return self.content
+		return self.content[:]
 	
 	def set_content(self, content):
 		content = content[:] #if content == self.content, it should be seperated on at least the surface level
@@ -188,7 +221,7 @@ class Display_Box(Frame):
 	def add_content(self, content):
 		for thing in content:
 			self.labels.append(Label(self, text=f"{thing[0]}: {thing[1]} / min"))
-			self.labels[-1].grid(column=0, row=len(self.labels), padx=7, pady=1, sticky="W")
+			self.labels[-1].grid(column=0, row=len(self.labels), padx=7, pady=1, sticky="W", columnspan=2)
 		self.content += content
 	
 	def validate_display_values(self):
