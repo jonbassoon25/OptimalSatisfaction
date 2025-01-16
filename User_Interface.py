@@ -1,6 +1,5 @@
 from tkinter import *
 from tkinter import ttk
-from Drag_Sort import Drag_Sort
 
 import Items
 
@@ -58,6 +57,8 @@ class Optimal_Satisfaction_UI:
 		all_recipe.grid(column=1, row=8, sticky="W", padx=15)
 
 		self.input_resources = []
+		input_resource_display = Display_Box(mainframe, root, [["test", 1], ["test2", 2]])
+		input_resource_display.grid(column=0, row=9, columnspan=2)
 
 		ttk.Button(mainframe, command=lambda: Item_Selection(root, self.input_resources), text="test").grid(column=0, row=10)
 
@@ -93,8 +94,8 @@ class Optimal_Satisfaction_UI:
 
 
 class Item_Selection:
-	def __init__(self, root, listvariable):
-		self.listvariable = listvariable
+	def __init__(self, root, display_box):
+		self.display_box = display_box
 
 		self.root = Toplevel(root)
 		root = self.root
@@ -141,12 +142,110 @@ class Item_Selection:
 
 	def add(self):
 		#self.listvariable.set((self.listvariable.get() + "".join([" " + Items.get_item_by_name(self.item_list[i]).__name__ for i in self.item_listbox.curselection()])).strip())
-		self.listvariable.append([self.item_list[self.item_listbox.curselection()[0]], int(self.production_rate_str.get())])
-		print(self.listvariable)
+		self.display_box.add_content([[self.item_list[self.item_listbox.curselection()[0]], int(self.production_rate_str.get())]])
 		self.destroy()
-
 
 	def destroy(self):
 		self.root.destroy()
+
+
+class Display_Box(Frame):
+	def __init__(self, master, root, content):
+		'''
+		Parameters:
+			master: master
+			content (list): content. format: [["item name", quantity], ...]
+		'''
+		super().__init__(master)
+		self.root = root
+		self["borderwidth"] = 2
+		self["relief"] = "ridge"
+		self.content = content
+		Label(self, text="Input Items:    ").grid(column=0, row=0)
+
+		self.labels = []
+		self.set_content(content)
+
+		add_button = Button(self, text="Add Item", command=lambda: Item_Selection(self.root, self))
+		add_button.grid(column=0, row=99)
+
+
+	def get_content(self):
+		return self.content
+	
+	def set_content(self, content):
+		for label in self.labels:
+			label.destroy()
+		self.labels = []
+
+		self.add_content(content)
+	
+	def add_content(self, content):
+		for thing in content:
+			self.labels.append(Label(self, text=f"{thing[0]}: {thing[1]}"))
+			self.labels[-1].grid(column=0, row=len(self.labels), padx=7, pady=1, sticky="W")
+
+
+class Drag_Sort(Canvas):
+	def __init__(self, master, options, x_scale = 1, y_scale = 1, orient = VERTICAL):
+		width = x_scale * 100
+		height = y_scale * 20
+
+		if orient == VERTICAL:
+			height *= len(options)
+		elif orient == HORIZONTAL:
+			width *= len(options)
+		else:
+			raise Exception(f"Orient not recognized: {orient.__name__}")
+
+		super().__init__(master, width=width, height=height)
+		self.orient = orient
+
+		self.selected_item = None
+		self.dy = 0
+		
+
+		self.bind("<Enter>", lambda event: self.enter_canvas(event))
+		self.bind("<Leave>", lambda event: self.exit_canvas(event))
+		
+		self.bind("<Button>", self.on_canvas_pressed)
+		self.bind("<ButtonRelease>", self.on_canvas_released)
+
+		items = [Label(self, text=item_name) for item_name in options]
+		self.dragable_block_ids = []
+		
+		
+		for i in range(len(items)):
+			item = items[i]
+
+			if orient == VERTICAL:
+				id = self.create_window(width/2, (i + 0.5) * height/len(options), width=width, height=height/len(options), window=item, tags=("dragable_block"))
+			else:
+				id = self.create_window((i + 0.5) * width/len(options), height/2, width=width/len(options), height=height, window=item, tags=("dragable_block"))
+
+			self.dragable_block_ids.append(id)
+			
+
+	def on_canvas_pressed(self, event):
+		print("canvas was pressed")
+		#self.selected_item = item
+		self.dy = event.y #- item.y
+	
+	def on_canvas_released(self, event):
+		print("canvas was released")
+
+	def enter_canvas(self, event):
+		print("entered canvas area")
+		if self.selected_item == None:
+			return
+		target_y = event.y - self.dy
+		cur_y = 0
+
+	def exit_canvas(self, event):
+		print("exited canvas area")
+		if self.selected_item == None:
+			return
+		self.selected_item = None
+
 
 Optimal_Satisfaction_UI().mainloop()
