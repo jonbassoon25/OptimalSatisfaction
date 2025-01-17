@@ -68,7 +68,9 @@ class Optimal_Satisfaction_UI:
 		construction_limit_display = Display_Box(mainframe, root, text="Construction Limits", content=self.construction_limits, allow_zero=True)
 		construction_limit_display.grid(column=7, row=1, columnspan=2, padx=5, sticky="NW")
 
-		Button(mainframe, text="print", command=lambda:print(self.input_resources, self.resource_limits, self.construction_limits)).grid(column=0, row=99)
+		calculate = Button(mainframe, text="Calculate Paths", command=lambda:None)
+		calculate.grid(column=0, row=10, columnspan=2)
+
 
 		#ds = Drag_Sort(root, ["Hello", "World", "test", "test", "test"])
 		#ds.grid(column=0, row=5)
@@ -101,7 +103,7 @@ class Optimal_Satisfaction_UI:
 			self.production_rate_str.set(str(int(self.production_rate_str.get())))
 
 
-class Item_Selection:
+class Item_Selection_Window:
 	def __init__(self, root, display_box):
 		self.display_box = display_box
 
@@ -159,7 +161,7 @@ class Item_Selection:
 	def destroy(self):
 		self.root.destroy()
 	
-class Item_Deletion:
+class Item_Deletion_Window:
 	def __init__(self, root, display_box):
 		self.display_box = display_box
 
@@ -208,10 +210,10 @@ class Display_Box(Frame):
 		self.labels = []
 		self.set_content(content)
 
-		remove_button = Button(self, text="Remove Item", command=lambda: Item_Deletion(self.root, self))
+		remove_button = Button(self, text="Remove Item", command=lambda: Item_Deletion_Window(self.root, self))
 		remove_button.grid(column=0, row=255)
 
-		add_button = Button(self, text="Add Item", command=lambda: Item_Selection(self.root, self))
+		add_button = Button(self, text="Add Item", command=lambda: Item_Selection_Window(self.root, self))
 		add_button.grid(column=1, row=255)
 
 
@@ -301,6 +303,17 @@ class Drag_Sort(Canvas):
 		if self.selected_item == None:
 			return
 		self.selected_item = None
+
+
+class Production_Paths_Window:
+	def __init__(self, root, production_tree):
+		pass
+
+
+class Production_Path_Window:
+	def __init__(self, root, production_path):
+		pass
+
 
 
 Optimal_Satisfaction_UI().mainloop()
