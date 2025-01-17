@@ -294,7 +294,6 @@ class Empty_Canister(Item):
 class Reanimated_Sam(Item): #Not complete
 	name = "Reanimated SAM"
 
-
 resources = [ret[1] for ret in inspect.getmembers(sys.modules[__name__], inspect.isclass)] #Get list of all resource classes
 #remove non-lookup classes
 resources.remove(Item)

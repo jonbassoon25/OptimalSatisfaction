@@ -19,6 +19,9 @@ def generate_production_tree(output_item, production_rate, miner_level, default_
 	Returns:
 		(dict): Dictionary with array of possible production trees for each input of the output item going to only input resources, which have empty arrays
 	'''
+	if type(output_item) == type(""):
+		output_item = Items.get_item_by_name(output_item)
+
 	production_tree = {}
 	recipes = output_item.default_recipes
 	if not default_only:

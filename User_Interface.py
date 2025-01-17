@@ -2,6 +2,7 @@ from tkinter import *
 from tkinter import ttk
 
 import Items
+import Setup_Generator
 
 
 class Optimal_Satisfaction_UI:
@@ -70,6 +71,9 @@ class Optimal_Satisfaction_UI:
 
 		calculate = Button(mainframe, text="Calculate Paths", command=lambda:None)
 		calculate.grid(column=0, row=10, columnspan=2)
+
+		calculate = Button(mainframe, text="test", command=lambda:Production_Paths_Window(root, Setup_Generator.generate_production_tree("Automated Wiring", 10, 2)))
+		calculate.grid(column=0, row=11, columnspan=2)
 
 
 		#ds = Drag_Sort(root, ["Hello", "World", "test", "test", "test"])
@@ -307,12 +311,47 @@ class Drag_Sort(Canvas):
 
 class Production_Paths_Window:
 	def __init__(self, root, production_tree):
-		pass
+		self.root = Toplevel(root)
+		root = self.root
+
+		self.production_tree = production_tree
+		self.production_paths = Setup_Generator.split_production_tree(production_tree)
+
+		root.title("Production Paths")
+		root.resizable(False, False)
+
+		mainframe = ttk.Frame(root, padding="10 10")
+		mainframe.grid(column=0, row=0)
+
+		Label(mainframe, text="Production Paths:").grid(column=0, row=0, sticky="W")
+
+		self.simple_production_paths = []
+		for production_branch in self.production_paths:
+			self.simple_production_paths.append({
+				"name": ' '.join(Setup_Generator.get_production_recipes(production_branch)[0].__class__.__name__.split("_")),
+				"inputs": Setup_Generator.get_inputs(production_branch), 
+				"outputs": Setup_Generator.get_outputs(production_branch)
+				})
+		
+		#listbox of simple production paths
+		simple_production_paths_text = []
+		for path in self.simple_production_paths:
+			simple_production_paths_text.append(f"{path["name"]}  -  {', '.join([key + ": " + str(path["inputs"][key]) for key in path["inputs"].keys()])} --> {', '.join([key + ": " + str(path["outputs"][key]) for key in path["outputs"].keys()])}")
+		
+		production_path_listbox = Listbox(mainframe, width=80, height=10, listvariable=StringVar(value=simple_production_paths_text))
+		production_path_listbox.grid(column=0, row=1)
 
 
 class Production_Path_Window:
 	def __init__(self, root, production_path):
-		pass
+		self.root = Toplevel(root)
+		root = self.root
+
+		root.title("Production Path")
+		root.resizable(False, False)
+
+		mainframe = ttk.Frame(root, padding="10 10")
+		mainframe.grid(column=0, row=0)
 
 
 
