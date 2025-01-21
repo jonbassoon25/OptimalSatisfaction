@@ -335,7 +335,7 @@ class Production_Paths_Window:
 		#listbox of simple production paths
 		simple_production_paths_text = []
 		for path in self.simple_production_paths:
-			simple_production_paths_text.append(f"{path["name"]} - {', '.join([key + ": " + str(path["inputs"][key]) + "/min" for key in path["inputs"].keys()])} --> {', '.join([key + ": " + str(path["outputs"][key]) + "/min" for key in path["outputs"].keys()])}")
+			simple_production_paths_text.append(f"{path['name']} - {', '.join([key + ': ' + str(path['inputs'][key]) + '/min' for key in path['inputs'].keys()])} --> {', '.join([key + ': ' + str(path['outputs'][key]) + '/min' for key in path['outputs'].keys()])}")
 		
 		production_path_listbox = Listbox(mainframe, width=80, height=10, listvariable=StringVar(value=simple_production_paths_text))
 		production_path_listbox.grid(column=0, row=1)
@@ -374,7 +374,7 @@ class Production_Path_Window:
 		Label(input_frame, text="Inputs:").grid(column=0, row=0, sticky="W")
 		for i in range(len(simple_production_path["inputs"].keys())):
 			key = list(simple_production_path["inputs"].keys())[i]
-			Label(input_frame, text=f"{key}: {simple_production_path["inputs"][key]}").grid(column=0, row=i+1, padx=10, sticky="W")
+			Label(input_frame, text=f"{key}: {simple_production_path['inputs'][key]}").grid(column=0, row=i+1, padx=10, sticky="W")
 
 
 		output_frame = Frame(mainframe)
@@ -385,7 +385,7 @@ class Production_Path_Window:
 		Label(output_frame, text="Outputs:").grid(column=0, row=0, sticky="W")
 		for i in range(len(simple_production_path["outputs"].keys())):
 			key = list(simple_production_path["outputs"].keys())[i]
-			Label(output_frame, text=f"{key}: {simple_production_path["outputs"][key]}").grid(column=0, row=i+1, padx=10, sticky="W")
+			Label(output_frame, text=f"{key}: {simple_production_path['outputs'][key]}").grid(column=0, row=i+1, padx=10, sticky="W")
 
 		view_path_tree_button = Button(mainframe, text="View Production Tree", command=lambda:Production_Path_Tree_Window(self.root, simple_production_path, production_path))
 		view_path_tree_button.grid(column=1, row=5, sticky="N")
@@ -395,11 +395,13 @@ class Production_Path_Tree_Window:
 		self.root = Toplevel(root)
 		root = self.root
 
-		root.title(f"Production Tree for {simple_production_path["name"]}")
+		root.title(f"Production Tree for {simple_production_path['name']}")
 		root.resizable(False, False)
 
 		mainframe = ttk.Frame(root, padding="10 10")
 		mainframe.grid(column=0, row=0)
+
+		Label(mainframe, text="testestestestestestestestestest").grid(column=0, row=0)
 
 		print(self.create_ppt_plan(production_path))
 	
