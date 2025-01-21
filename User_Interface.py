@@ -206,7 +206,7 @@ class Display_Box(Frame):
 		super().__init__(master)
 		self.root = root
 		self["borderwidth"] = 2
-		self["relief"] = "ridge"
+		self["relief"] = "groove"
 		self.content = content
 		self.allow_zero = allow_zero
 		Label(self, text=f"{text}:    ").grid(column=0, row=0, columnspan=2, sticky="W")
@@ -241,7 +241,6 @@ class Display_Box(Frame):
 	
 	def validate_display_values(self):
 		for thing in self.content:
-			print(self.allow_zero)
 			if thing[1] == 0 and not self.allow_zero:
 				self.content.remove(thing)
 		self.set_content(self.content)
@@ -336,23 +335,79 @@ class Production_Paths_Window:
 		#listbox of simple production paths
 		simple_production_paths_text = []
 		for path in self.simple_production_paths:
-			simple_production_paths_text.append(f"{path["name"]}  -  {', '.join([key + ": " + str(path["inputs"][key]) for key in path["inputs"].keys()])} --> {', '.join([key + ": " + str(path["outputs"][key]) for key in path["outputs"].keys()])}")
+			simple_production_paths_text.append(f"{path["name"]} - {', '.join([key + ": " + str(path["inputs"][key]) + "/min" for key in path["inputs"].keys()])} --> {', '.join([key + ": " + str(path["outputs"][key]) + "/min" for key in path["outputs"].keys()])}")
 		
 		production_path_listbox = Listbox(mainframe, width=80, height=10, listvariable=StringVar(value=simple_production_paths_text))
 		production_path_listbox.grid(column=0, row=1)
+		production_path_listbox.bind("<Double-1>", lambda _: Production_Path_Window(self.root, self.simple_production_paths[production_path_listbox.curselection()[0]], self.production_paths[production_path_listbox.curselection()[0]]))
 
 
 class Production_Path_Window:
-	def __init__(self, root, production_path):
+	def __init__(self, root, simple_production_path, production_path):
 		self.root = Toplevel(root)
 		root = self.root
 
-		root.title("Production Path")
+		root.title(simple_production_path["name"])
 		root.resizable(False, False)
 
 		mainframe = ttk.Frame(root, padding="10 10")
 		mainframe.grid(column=0, row=0)
 
+		Label(mainframe, text=f"Maximum Energy Consumption: {Setup_Generator.get_max_energy_use(production_path)} MW").grid(column=0, row=2, columnspan=2, sticky="W")
+
+		construction_requirments_frame = Frame(mainframe)
+		construction_requirments_frame.grid(column=0, row=3, padx=10, pady=10, rowspan=3, sticky="NW")
+		construction_requirments_frame["borderwidth"] = 2
+		construction_requirments_frame["relief"] = "groove"
+
+		Label(construction_requirments_frame, text="Construction Requirements: ").grid(column=0, row=0, sticky="W")
+		construction_requirments = Setup_Generator.get_construction_requirements(production_path)
+		for i in range(len(construction_requirments.keys())):
+			key = list(construction_requirments.keys())[i]
+			Label(construction_requirments_frame, text=f"{key}: {construction_requirments[key]}").grid(column=0, row=i+1, padx=10, sticky="W")
+
+		input_frame = Frame(mainframe)
+		input_frame.grid(column=1, row=3, padx=10, pady=10, sticky="NW")
+		input_frame["borderwidth"] = 2
+		input_frame["relief"] = "groove"
+
+		Label(input_frame, text="Inputs:").grid(column=0, row=0, sticky="W")
+		for i in range(len(simple_production_path["inputs"].keys())):
+			key = list(simple_production_path["inputs"].keys())[i]
+			Label(input_frame, text=f"{key}: {simple_production_path["inputs"][key]}").grid(column=0, row=i+1, padx=10, sticky="W")
+
+
+		output_frame = Frame(mainframe)
+		output_frame.grid(column=1, row=4, padx=10, pady=10, sticky="NW")
+		output_frame["borderwidth"] = 2
+		output_frame["relief"] = "groove"
+
+		Label(output_frame, text="Outputs:").grid(column=0, row=0, sticky="W")
+		for i in range(len(simple_production_path["outputs"].keys())):
+			key = list(simple_production_path["outputs"].keys())[i]
+			Label(output_frame, text=f"{key}: {simple_production_path["outputs"][key]}").grid(column=0, row=i+1, padx=10, sticky="W")
+
+		view_path_tree_button = Button(mainframe, text="View Production Tree", command=lambda:Production_Path_Tree_Window(self.root, simple_production_path, production_path))
+		view_path_tree_button.grid(column=1, row=5, sticky="N")
+
+class Production_Path_Tree_Window:
+	def __init__(self, root, simple_production_path, production_path):
+		self.root = Toplevel(root)
+		root = self.root
+
+		root.title(f"Production Tree for {simple_production_path["name"]}")
+		root.resizable(False, False)
+
+		mainframe = ttk.Frame(root, padding="10 10")
+		mainframe.grid(column=0, row=0)
+
+		print(self.create_ppt_plan(production_path))
+	
+	def create_ppt_plan(self, production_branch): #production path tree plan
+		ppt_plan = list(production_branch.keys()) #only 1 key in a production branch
+		for sub_branch in list(production_branch.values())[0]: #only 1 value in a production branch
+			ppt_plan.append(self.create_ppt_plan(sub_branch))
+		return ppt_plan
 
 
 Optimal_Satisfaction_UI().mainloop()

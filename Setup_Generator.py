@@ -1,4 +1,5 @@
 import itertools
+import math
 
 import Util
 import Production_Machines
@@ -124,6 +125,25 @@ def get_outputs(production_branch):
 		
 	return outputs
 
+
+def get_max_energy_use(production_branch):
+	production_recipes = get_production_recipes(production_branch)
+	meu = 0 #max energy use
+	for recipe in production_recipes:
+		meu += recipe.production_machine.maximum_power_draw
+	return meu
+
+def get_construction_requirements(production_branch):
+	production_recieps = get_production_recipes(production_branch)
+	construction_requirements = {}
+	for recipe in production_recieps:
+		for key in recipe.production_machine.construction_requirements:
+			if key in construction_requirements.keys():
+				construction_requirements[key] += recipe.production_machine.construction_requirements[key] * math.ceil(recipe.quantity_multiplier)
+			else:
+				construction_requirements[key] = recipe.production_machine.construction_requirements[key]
+	return construction_requirements
+
 def generate_setup(output_item_name, production_rate, miner_level, input_resources = {},
 				   order_of_importance = ["maximize resource efficiency", "use input resources", "minimize byproducts", "minimize construction cost", "minimize energy consumption"], 
 				   resource_rate_limitations = {"SAM": 0}, 
@@ -144,12 +164,14 @@ def generate_setup(output_item_name, production_rate, miner_level, input_resourc
 	#When deciding which branch of a production tree to use, use the best recipe until it is not possible then the second best, and so on unil no recipes are possible or the resource requirement is fufilled
 
 if __name__ == "__main__":
-	item_name = "Smart Plating"
-	quantity = 2000 #per min
+	item_name = "Automated Wiring"
+	quantity = 10 #per min
 
 	gpt = generate_production_tree(Items.get_item_by_name(item_name), quantity, 1)
 	spt = split_production_tree(gpt)
 	for production_branch in spt:
+		print()
+		print(production_branch)
 		print()
 		production_recipes = get_production_recipes(production_branch)
 		print(production_recipes)
