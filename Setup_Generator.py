@@ -5,7 +5,7 @@ import Production_Machines
 import Recipes
 import Items
 
-def generate_production_tree(output_item, production_rate, miner_level, default_only = True, input_resources = {}):
+def generate_production_tree(output_item, production_rate, miner_level, default_only = True, input_resources = {}, blacklist_recipes = set()):
 	'''
 	Recursivly generates a complete production tree for the given output item
 	Excess input resources are not included as part of the tree
@@ -42,6 +42,12 @@ def generate_production_tree(output_item, production_rate, miner_level, default_
 	#get the defualt production paths
 	#Build a tree that starts with each initial recipe and branches to each recipe of the initial recipe's input. Each branch of the tree should only use given inputs from its same branch
 	for recipe in recipes:
+		#Correct for blacklisted recipes to avoid looping production
+		print(recipe)
+		print(recipe.production_machine)
+		if recipe in blacklist_recipes:
+			continue
+
 		#Correct for special miner recipes. Don't allow miner levels that aren't specified
 		#Correction bc work was already put in to do the miner levels in a not so good way
 		if issubclass(recipe.production_machine, Production_Machines.Resource_Miner):
@@ -56,8 +62,11 @@ def generate_production_tree(output_item, production_rate, miner_level, default_
 		recipe = recipe(recipe_quantity)
 		production_tree[recipe] = []
 
+		next_blacklist_recipes = blacklist_recipes.copy()
+		next_blacklist_recipes.add(recipe.__class__)
+
 		for input in recipe.inputs.keys(): #length of 0 when pulling from raw resource which will end recursion
-			production_tree[recipe].append(generate_production_tree(Items.get_item_by_name(input), recipe.inputs[input], miner_level, default_only, input_resources))
+			production_tree[recipe].append(generate_production_tree(Items.get_item_by_name(input), recipe.inputs[input], miner_level, default_only, input_resources, blacklist_recipes=next_blacklist_recipes))
 	
 	return production_tree
 
@@ -144,8 +153,8 @@ def generate_setup(output_item_name, production_rate, miner_level, input_resourc
 	#When deciding which branch of a production tree to use, use the best recipe until it is not possible then the second best, and so on unil no recipes are possible or the resource requirement is fufilled
 
 if __name__ == "__main__":
-	item_name = "Smart Plating"
-	quantity = 2000 #per min
+	item_name = "Crude Oil"
+	quantity = 1 #per min
 
 	gpt = generate_production_tree(Items.get_item_by_name(item_name), quantity, 1)
 	spt = split_production_tree(gpt)
