@@ -30,8 +30,13 @@ def generate_production_tree(output_item, production_rate, miner_level, default_
 
 	#copy input resources for each recipe so that all production paths don't pull from a common input_resources object. Recursion will call this line for all sub-recipes
 	input_resources = Util.copy_flat_dict(input_resources)
-	
+
+
 	if output_item.name in input_resources.keys():
+		if output_item.name == "Empty Canister":
+			production_tree[Recipes.User_Provided_Resource({"Empty Canister": production_rate})] = []
+			return production_tree
+		
 		if production_rate <= input_resources[output_item.name]:
 			input_resources[output_item.name] -= production_rate
 			production_tree[Recipes.User_Provided_Resource({output_item.name: production_rate})] = []
@@ -40,14 +45,21 @@ def generate_production_tree(output_item, production_rate, miner_level, default_
 			production_rate -= input_resources[output_item.name]
 			del input_resources[output_item.name]
 	
-	#get the defualt production paths
+	#get the default production paths
 	#Build a tree that starts with each initial recipe and branches to each recipe of the initial recipe's input. Each branch of the tree should only use given inputs from its same branch
 	for recipe in recipes:
 		#Correct for blacklisted recipes to avoid looping production
-		print(recipe)
-		print(recipe.production_machine)
 		if recipe in blacklist_recipes:
 			continue
+
+		#Only use package recipes if there are canisters in input resources
+		if "Empty Canister" in recipe.inputs.keys() and not "Empty Canister" in input_resources.keys():
+			continue
+
+		#Only use unpackage recipes if there is a provided input of that packaged resource. Only 1 input for unpackage recipes
+		if "Empty Canister" in recipe.outputs.keys() and not list(recipe.inputs.keys())[0] in input_resources.keys():
+			continue
+
 
 		#Correct for special miner recipes. Don't allow miner levels that aren't specified
 		#Correction bc work was already put in to do the miner levels in a not so good way
@@ -153,6 +165,7 @@ def get_construction_requirements(production_branch):
 				construction_requirements[key] = recipe.production_machine.construction_requirements[key]
 	return construction_requirements
 
+
 def generate_setup(output_item_name, production_rate, miner_level, input_resources = {},
 				   order_of_importance = ["maximize resource efficiency", "use input resources", "minimize byproducts", "minimize construction cost", "minimize energy consumption"], 
 				   resource_rate_limitations = {"SAM": 0}, 
@@ -173,7 +186,7 @@ def generate_setup(output_item_name, production_rate, miner_level, input_resourc
 	#When deciding which branch of a production tree to use, use the best recipe until it is not possible then the second best, and so on unil no recipes are possible or the resource requirement is fufilled
 
 if __name__ == "__main__":
-	item_name = "Automated Wiring"
+	item_name = "Crude Oil"
 	quantity = 10 #per min
 
 	gpt = generate_production_tree(Items.get_item_by_name(item_name), quantity, 1)
