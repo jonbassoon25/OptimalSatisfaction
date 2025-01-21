@@ -636,42 +636,96 @@ class Steel_Canister(Recipe):
 	inputs = {"Steel Ingot": 40}
 	outputs = {"Empty Canister": 40}
 
+class Unpackage_Alumina_Solution(Recipe):
+	production_machine = PMs.Packager
+	inputs = {"Packaged Alumina Solution": 120}
+	outputs = {"Alumina Solution": 120, "Empty Canister": 120}
+class Unpackage_Liquid_Biofuel(Recipe):
+	production_machine = PMs.Packager
+	inputs = {"Packaged Liquid Biofuel": 60}
+	outputs = {"Liquid Biofuel": 60, "Empty Canister": 60}
+class Unpackage_Sulfuric_Acid(Recipe):
+	production_machine = PMs.Packager
+	inputs = {"Packaged Sulfuric Acid": 60}
+	outputs = {"Sulfuric Acid": 60, "Empty Canister": 60}
+class Unpackage_Turbofuel(Recipe):
+	production_machine = PMs.Packager
+	inputs = {"Packaged Turbofuel": 20}
+	outputs = {"Turbofuel": 20, "Empty Canister": 20}
+
+class Package_Alumina_Solution(Recipe):
+	production_machine = PMs.Packager
+	inputs = {"Alumina Solution": 120, "Empty Canister": 120}
+	outputs = {"Packaged Alumina Solution": 120}
+class Package_Liquid_Biofuel(Recipe):
+	production_machine = PMs.Packager
+	inputs = {"Liquid Biofuel": 60, "Empty Canister": 60}
+	outputs = {"Packaged Liquid Biofuel": 60}
+class Package_Sulfuric_Acid(Recipe):
+	production_machine = PMs.Packager
+	inputs = {"Sulfuric Acid": 60, "Empty Canister": 60}
+	outputs = {"Packaged Sulfuric Acid": 60}
+class Package_Turbofuel(Recipe):
+	production_machine = PMs.Packager
+	inputs = {"Turbofuel": 20, "Empty Canister": 20}
+	outputs = {"Packaged Turbofuel": 20}
+class Package_Oil(Recipe):
+	production_machine = PMs.Packager
+	inputs = {"Crude Oil": 60, "Empty Canister": 60}
+	outputs = {"Packaged Oil": 60}
+class Package_Fuel(Recipe):
+	production_machine = PMs.Packager
+	inputs = {"Fuel": 60, "Empty Canister": 60}
+	outputs = {"Packaged Fuel": 60}
+class Package_Heavy_Oil_Residue(Recipe):
+	production_machine = PMs.Packager
+	inputs = {"Heavy Oil Residue": 20, "Empty Canister": 20}
+	outputs = {"Packaged Heavy Oil Residue": 20}
+class Package_Water(Recipe):
+	production_machine = PMs.Packager
+	inputs = {"Water": 120, "Empty Canister": 120}
+	outputs = {"Packaged Water": 120}
+class Package_Nitrogen_Gas(Recipe):
+	production_machine = PMs.Packager
+	inputs = {"Nitrogen Gas": 240, "Empty Fluid Tank": 60}
+	outputs = {"Packaged Nitrogen Gas": 60}
+
 
 
 
 #-----Incomplete-----#
 
 class Aluminum_Scrap(Recipe):
-	production_machine = None #Refinery
+	production_machine = PMs.Refinery
 	inputs = {"Alumina Solution": 240, "Coal": 120}
 	outputs = {"Aluminum Scrap": 360, "Water": 120}
 
 class Battery(Recipe):
-	production_machine = None #Blender
+	production_machine = PMs.Blender
 	inputs = {"Sulfuric Acid": 50, "Alumina Solution": 40, "Aluminum Casing": 20}
 	outputs = {"Battery": 20, "Water": 30}
 
 class Non_Fissile_Uranium(Recipe):
-	production_machine = None #Blender
+	production_machine = PMs.Blender
 	inputs = {"Uranium Waste": 37.5, "Silica": 25, "Nitric Acid": 15, "Sulfuric Acid": 15}
 	outputs = {"Non-Fissile Uranium": 50, "Water": 15}
 
 class Distilled_Silica(Recipe):
-	production_machine = None #Blender
+	production_machine = PMs.Blender
 	inputs = {"Dissolved Silica": 120, "Limestone": 50, "Water": 100}
 	outputs = {"Silica": 270, "Water": 80}
 
 class Electrode_Aluminum_Scrap(Recipe):
-	production_machine = None #Refinery
+	production_machine = PMs.Refinery
 	inputs = {"Alumina Solution": 180, "Petroleum Coke": 60}
 	outputs = {"Aluminum Scrap": 300, "Water": 105}
 
 class Fertile_Uranium(Recipe):
-	production_machine = None #Blender
+	production_machine = PMs.Blender
 	inputs = {"Uranium Ore": 25, "Uranium Waste": 25, "Nitric Acid": 15, "Sulfuric Acid": 25}
 	outputs = {"Non-Fissile Uranium": 100, "Water": 40}
 
 class Instant_Scrap(Recipe):
-	production_machine = None #Blender
+	production_machine = PMs.Blender
 	inputs = {"Bauxite": 150, "Coal": 100, "Sulfuric Acid": 50, "Water": 60}
 	outputs = {"Aluminum Scrap": 300, "Water": 50}
