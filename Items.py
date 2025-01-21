@@ -287,9 +287,49 @@ class Circuit_Board(Item):
 
 class Empty_Canister(Item):
 	name = "Empty Canister"
-	default_recipes = []
-	alternate_recipes = []
+	default_recipes = [Recipes.Empty_Canister, Recipes.Unpackage_Alumina_Solution, Recipes.Unpackage_Fuel, Recipes.Unpackage_Heavy_Oil_Residue, Recipes.Unpackage_Liquid_Biofuel, Recipes.Unpackage_Oil, Recipes.Unpackage_Sulfuric_Acid, Recipes.Unpackage_Turbofuel, Recipes.Unpackage_Water]
+	alternate_recipes = [Recipes.Coated_Iron_Canister, Recipes.Steel_Canister]
 	sink_yield = 60
+
+class Packaged_Alumina_Solution(Item):
+	name = "Packaged Alumina Solution"
+	default_recipes = [Recipes.Package_Alumina_Solution]
+	sink_yield = 160
+
+class Packaged_Fuel(Item):
+	name = "Packaged Fuel"
+	default_recipes = [Recipes.Package_Fuel]
+	sink_yield = 270
+
+class Packaged_Heavy_Oil_Residue(Item):
+	name = "Packaged Heavy Oil Residue"
+	default_recipes = [Recipes.Package_Heavy_Oil_Residue]
+	sink_yield = 180
+
+class Packaged_Liquid_Biofuel(Item):
+	name = "Packaged Liquid Biofuel"
+	default_recipes = [Recipes.Package_Liquid_Biofuel]
+	sink_yield = 370
+
+class Packaged_Oil(Item):
+	name = "Packaged Oil"
+	default_recipes = [Recipes.Package_Oil]
+	sink_yield = 180
+
+class Packaged_Sulfuric_Acid(Item):
+	name = "Packaged Sulfuric Acid"
+	default_recipes = [Recipes.Package_Sulfuric_Acid]
+	sink_yield = 152
+
+class Packaged_Turbofuel(Item):
+	name = "Packaged Turbofuel"
+	default_recipes = [Recipes.Package_Turbofuel]
+	sink_yield = 570
+
+class Packaged_Water(Item):
+	name = "Packaged Water"
+	default_recipes = [Recipes.Package_Water]
+	sink_yield = 130
 
 class Reanimated_Sam(Item): #Not complete
 	name = "Reanimated SAM"
@@ -317,4 +357,6 @@ def get_item_by_name(item_name):
 	for item in resources:
 		if item.name == item_name:
 			return item
-	raise Exception(f"{item_name} is not an Item.")
+	#raise Exception(f"{item_name} is not an Item.")
+	print(f"{item_name} is not an Item.")
+	return Item
