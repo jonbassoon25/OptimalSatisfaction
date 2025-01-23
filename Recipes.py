@@ -541,7 +541,7 @@ class Automated_Wiring(Recipe):
 	outputs = {"Automated Wiring": 2.5}
 class Automated_Speed_Wiring(Recipe):
 	production_machine = PMs.Manufacturer
-	inputs = {"Stator": 3.75, "Wire": 75, "High Spweed Connector": 1.875}
+	inputs = {"Stator": 3.75, "Wire": 75, "High Speed Connector": 1.875}
 	outputs = {"Automated Wiring": 7.5}
 
 class Plastic(Recipe):

@@ -1,5 +1,6 @@
 import itertools
 import math
+import time
 
 import Util
 import Production_Machines
@@ -24,9 +25,10 @@ def generate_production_tree(output_item, production_rate, miner_level, default_
 		output_item = Items.get_item_by_name(output_item)
 
 	production_tree = {}
-	recipes = output_item.default_recipes
+	recipes = output_item.default_recipes.copy()
 	if not default_only:
-		recipes += output_item.alternate_recipes
+		recipes += output_item.alternate_recipes.copy()
+
 
 	#copy input resources for each recipe so that all production paths don't pull from a common input_resources object. Recursion will call this line for all sub-recipes
 	input_resources = Util.copy_flat_dict(input_resources)
@@ -44,7 +46,7 @@ def generate_production_tree(output_item, production_rate, miner_level, default_
 		else:
 			production_rate -= input_resources[output_item.name]
 			del input_resources[output_item.name]
-	
+
 	#get the default production paths
 	#Build a tree that starts with each initial recipe and branches to each recipe of the initial recipe's input. Each branch of the tree should only use given inputs from its same branch
 	for recipe in recipes:
@@ -59,7 +61,6 @@ def generate_production_tree(output_item, production_rate, miner_level, default_
 		#Only use unpackage recipes if there is a provided input of that packaged resource. Only 1 input for unpackage recipes
 		if "Empty Canister" in recipe.outputs.keys() and not list(recipe.inputs.keys())[0] in input_resources.keys():
 			continue
-
 
 		#Correct for special miner recipes. Don't allow miner levels that aren't specified
 		#Correction bc work was already put in to do the miner levels in a not so good way
@@ -80,7 +81,7 @@ def generate_production_tree(output_item, production_rate, miner_level, default_
 
 		for input in recipe.inputs.keys(): #length of 0 when pulling from raw resource which will end recursion
 			production_tree[recipe].append(generate_production_tree(Items.get_item_by_name(input), recipe.inputs[input], miner_level, default_only, input_resources, blacklist_recipes=next_blacklist_recipes))
-	
+
 	return production_tree
 
 def split_production_tree(production_tree):
@@ -166,7 +167,64 @@ def get_construction_requirements(production_branch):
 	return construction_requirements
 
 
-def generate_setup(output_item_name, production_rate, miner_level, input_resources = {},
+def filter_production_paths(simple_production_paths, production_paths, output_item, production_rate):
+	'''
+	Filters a production paths list to only include paths that:
+	  -  Output the expected amount
+	  -  Don't include unnecessary intermediary steps that increase construction and energy costs
+	
+	Parameters:
+		production_paths (list): list of possible production paths
+	
+	Returns:
+		(list): list of filtered production paths
+	'''
+	if type(output_item) == type(""):
+		output_item = Items.get_item_by_name(output_item)
+
+	for production_branch in production_paths:
+		#Check for expected output amount
+		if get_outputs(production_branch)[output_item.name] != production_rate:
+			del production_paths[production_paths.index(production_branch)]
+			continue
+			
+		#Check for unnecessary intermediary steps
+
+		# A path with unnecessary steps is considered such if it has:
+		#  the same inputs/outputs as another path with a higher electrical consumption
+		#  and
+		#  the same or more of each type of construction resource as the other path
+
+		#Check if this path has the same inputs and outputs as any other paths and a higher electrical consumption
+		pass
+
+		#For each path that it does, check to see if this path has the same or more of each construction resouce of the path thereof
+		for other_path in []:
+			for i in []: #loop through construction resources
+				pass #If this path has the same or more of all construction resources, this path should be deleted as it is unnecessary
+	
+	return production_paths
+
+
+def sort_production_paths(production_paths, order_of_importance, input_resources):
+	pass
+
+
+def optimize_production_paths(sorted_production_paths, resource_rate_limitations, construction_limitations):
+	'''
+	Optimizes production paths to meet resource and construction limitations by using the best possible path until it is no longer possible and then using the next best
+
+	Parameters:
+		sorted_production_paths (list): list of sorted production paths
+		resource_rate_limitations (dict): dictionary of resource rate limitations (format: {"resource": quantity/min})
+		construction_limitations (dict): dictionary of construction limitations (format: {"resource": quantity})
+	
+	Returns:
+		(list): sorted list of optimized production paths
+	'''
+
+
+def generate_setup(output_item_name, production_rate, miner_level, input_resources = {},	
 				   order_of_importance = ["maximize resource efficiency", "use input resources", "minimize byproducts", "minimize construction cost", "minimize energy consumption"], 
 				   resource_rate_limitations = {"SAM": 0}, 
 				   construction_limitations = {"Power Shard": 0, "Somersloop": 0}
@@ -186,11 +244,12 @@ def generate_setup(output_item_name, production_rate, miner_level, input_resourc
 	#When deciding which branch of a production tree to use, use the best recipe until it is not possible then the second best, and so on unil no recipes are possible or the resource requirement is fufilled
 
 if __name__ == "__main__":
-	item_name = "Crude Oil"
+	item_name = "Plastic"
 	quantity = 10 #per min
 
-	gpt = generate_production_tree(Items.get_item_by_name(item_name), quantity, 1)
+	gpt = generate_production_tree(Items.get_item_by_name(item_name), quantity, 1, False)
 	spt = split_production_tree(gpt)
+	print(spt)
 	for production_branch in spt:
 		print()
 		print(production_branch)
@@ -198,7 +257,7 @@ if __name__ == "__main__":
 		production_recipes = get_production_recipes(production_branch)
 		print(production_recipes)
 		print()
-		print([recipe.inputs if recipe.inputs != {} else None for recipe in production_recipes])
+		print([recipe.inputs for recipe in production_recipes])
 		print()
 		print(get_inputs(production_branch))
 		print(get_outputs(production_branch))

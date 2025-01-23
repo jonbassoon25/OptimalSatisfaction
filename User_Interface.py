@@ -72,7 +72,7 @@ class Optimal_Satisfaction_UI:
 		calculate = Button(mainframe, text="Calculate Paths", command=lambda:None)
 		calculate.grid(column=0, row=10, columnspan=2)
 
-		calculate = Button(mainframe, text="test", command=lambda:Production_Paths_Window(root, Setup_Generator.generate_production_tree("Automated Wiring", 10, 2)))
+		calculate = Button(mainframe, text="test", command=lambda:Production_Paths_Window(root, Setup_Generator.generate_production_tree("Plastic", 60, 2, default_only=False)))
 		calculate.grid(column=0, row=11, columnspan=2)
 
 
@@ -315,6 +315,7 @@ class Production_Paths_Window:
 
 		self.production_tree = production_tree
 		self.production_paths = Setup_Generator.split_production_tree(production_tree)
+		self.production_paths = Setup_Generator.filter_production_paths(self.production_paths, "Plastic", 60)
 
 		root.title("Production Paths")
 		root.resizable(False, False)
@@ -401,7 +402,10 @@ class Production_Path_Tree_Window:
 		mainframe = ttk.Frame(root, padding="10 10")
 		mainframe.grid(column=0, row=0)
 
-		Label(mainframe, text="testestestestestestestestestest").grid(column=0, row=0)
+		Label(mainframe, text="Production Path").grid(column=0, row=0)
+
+		s = StringVar(value=Setup_Generator.get_production_recipes(production_path))
+		Listbox(mainframe, height=40, width=80, listvariable=s).grid(column=0, row=1)
 
 		print(self.create_ppt_plan(production_path))
 	
