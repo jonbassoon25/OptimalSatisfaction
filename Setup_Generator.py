@@ -157,7 +157,6 @@ def get_outputs(production_branch):
 		
 	return outputs
 
-
 def get_max_energy_use(production_branch):
 	production_recipes = get_production_recipes(production_branch)
 	meu = 0 #max energy use
@@ -177,7 +176,7 @@ def get_construction_requirements(production_branch):
 	return construction_requirements
 
 
-def filter_production_paths(simple_production_paths, production_paths, output_item, production_rate):
+def filter_production_paths(production_paths, output_item, production_rate):
 	'''
 	Filters a production paths list to only include paths that:
 	  -  Output the expected amount
@@ -189,30 +188,58 @@ def filter_production_paths(simple_production_paths, production_paths, output_it
 	Returns:
 		(list): list of filtered production paths
 	'''
+	print("entered")
 	if type(output_item) == type(""):
 		output_item = Items.get_item_by_name(output_item)
+	del_indicies = set()
+	print(len(production_paths))
+	for i in range(len(production_paths)):
+		#Set constants for the loop
+		production_branch = production_paths[i]
+		branch_max_energy_use = get_max_energy_use(production_branch)
+		branch_requirements = get_construction_requirements(production_branch)
 
-	for production_branch in production_paths:
 		#Check for expected output amount
 		if get_outputs(production_branch)[output_item.name] != production_rate:
-			del production_paths[production_paths.index(production_branch)]
+			del_indicies.add(i)
 			continue
-			
+
 		#Check for unnecessary intermediary steps
 
 		# A path with unnecessary steps is considered such if it has:
 		#  the same inputs/outputs as another path with a higher electrical consumption
 		#  and
-		#  the same or more of each type of construction resource as the other path
+		#  more of each type of construction resource as the other path
 
 		#Check if this path has the same inputs and outputs as any other paths and a higher electrical consumption
-		pass
+		#Then for each path that it does, check to see if this path has the same or more of each construction resouce of the path thereof
+		for j in range(len(production_paths)):
+			#Don't check the path against itself
+			if j == i or j in del_indicies:
+				continue
 
-		#For each path that it does, check to see if this path has the same or more of each construction resouce of the path thereof
-		for other_path in []:
-			for i in []: #loop through construction resources
-				pass #If this path has the same or more of all construction resources, this path should be deleted as it is unnecessary
-	
+			#Check electrical consumption of this path to every other path
+			if branch_max_energy_use <= get_max_energy_use(production_paths[j]):
+				continue #first part of the check isn't true, so check is always false regardless of second part
+
+			#Check construction resources of this path to every other path
+			#Null hypothesis = this branch contains less or an equal amount of each construction resource than any other path
+			#Alternate hypotheses = this branch contains more of each construction resource than any other path
+			check_requirements = get_construction_requirements(production_paths[j])
+			for requirement in check_requirements.keys():
+				if not requirement in branch_requirements.keys():
+					continue #if the resource in the check branch isn't required for this one
+
+				if check_requirements[requirement] >= branch_requirements[requirement]:
+					continue #if the resource in the check branch is more than or equal to the quantity this recipe needs
+
+				#The null hypothesis was never proven so the alternate hypothesis is true and this branch should be removed
+				del_indicies.add(i)
+				break #second part of the check is true, so this production branch can be removed
+	#Remove del indices
+	for index in reversed(del_indicies):
+		del production_paths[index]
+	print("returned")
 	return production_paths
 
 

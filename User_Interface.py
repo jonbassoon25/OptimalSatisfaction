@@ -315,7 +315,7 @@ class Production_Paths_Window:
 
 		self.production_tree = production_tree
 		self.production_paths = Setup_Generator.split_production_tree(production_tree)
-		self.production_paths = Setup_Generator.filter_production_paths(Setup_Generator.get_simple_production_paths(self.production_paths), self.production_paths, "Plastic", 60)
+		self.production_paths = Setup_Generator.filter_production_paths(self.production_paths, "Plastic", 60)
 		self.simple_production_paths = Setup_Generator.get_simple_production_paths(self.production_paths)
 
 		root.title("Production Paths")
