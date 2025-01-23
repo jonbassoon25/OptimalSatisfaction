@@ -1,6 +1,7 @@
 import itertools
 import math
 import time
+from PDL import *
 
 import Util
 import Production_Machines
@@ -117,6 +118,7 @@ def get_production_recipes(production_branch):
 			production_recipes += get_production_recipes(production_branch[key][i])
 	return production_recipes
 
+#@memoize_production_path
 def get_inputs(production_branch):
 	production_recipes = get_production_recipes(production_branch)
 	inputs = {}
@@ -129,6 +131,7 @@ def get_inputs(production_branch):
 				inputs[recipe_output] = list(recipe.outputs.values())[0]
 	return inputs
 
+#@memoize_production_path
 def get_outputs(production_branch):
 	production_recipes = get_production_recipes(production_branch)
 	inputs = {}
@@ -157,6 +160,7 @@ def get_outputs(production_branch):
 		
 	return outputs
 
+#@memoize_production_path
 def get_max_energy_use(production_branch):
 	production_recipes = get_production_recipes(production_branch)
 	meu = 0 #max energy use
@@ -164,6 +168,7 @@ def get_max_energy_use(production_branch):
 		meu += recipe.production_machine.maximum_power_draw
 	return meu
 
+#@memoize_production_path
 def get_construction_requirements(production_branch):
 	production_recieps = get_production_recipes(production_branch)
 	construction_requirements = {}
@@ -192,8 +197,9 @@ def filter_production_paths(production_paths, output_item, production_rate):
 	if type(output_item) == type(""):
 		output_item = Items.get_item_by_name(output_item)
 	del_indicies = set()
-	print(len(production_paths))
+
 	for i in range(len(production_paths)):
+		print(i)
 		#Set constants for the loop
 		production_branch = production_paths[i]
 		branch_max_energy_use = get_max_energy_use(production_branch)
@@ -237,7 +243,7 @@ def filter_production_paths(production_paths, output_item, production_rate):
 				del_indicies.add(i)
 				break #second part of the check is true, so this production branch can be removed
 	#Remove del indices
-	for index in reversed(del_indicies):
+	for index in reversed(sorted(list(del_indicies))):
 		del production_paths[index]
 	print("returned")
 	return production_paths
