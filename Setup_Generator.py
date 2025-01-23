@@ -99,6 +99,16 @@ def split_production_tree(production_tree):
 			production_paths.append({key: list(tup)})
 	return production_paths
 
+def get_simple_production_paths(production_branch):
+	simple_production_paths = []
+	for production_branch in production_branch:
+		simple_production_paths.append({
+			"name": ' '.join(get_production_recipes(production_branch)[0].__class__.__name__.split("_")),
+			"inputs": get_inputs(production_branch), 
+			"outputs": get_outputs(production_branch)
+			})
+	return simple_production_paths
+
 def get_production_recipes(production_branch):
 	production_recipes = []
 	for key in production_branch:

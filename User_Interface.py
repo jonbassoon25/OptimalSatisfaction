@@ -315,7 +315,8 @@ class Production_Paths_Window:
 
 		self.production_tree = production_tree
 		self.production_paths = Setup_Generator.split_production_tree(production_tree)
-		self.production_paths = Setup_Generator.filter_production_paths(self.production_paths, "Plastic", 60)
+		self.production_paths = Setup_Generator.filter_production_paths(Setup_Generator.get_simple_production_paths(self.production_paths), self.production_paths, "Plastic", 60)
+		self.simple_production_paths = Setup_Generator.get_simple_production_paths(self.production_paths)
 
 		root.title("Production Paths")
 		root.resizable(False, False)
@@ -325,19 +326,12 @@ class Production_Paths_Window:
 
 		Label(mainframe, text="Production Paths:").grid(column=0, row=0, sticky="W")
 
-		self.simple_production_paths = []
-		for production_branch in self.production_paths:
-			self.simple_production_paths.append({
-				"name": ' '.join(Setup_Generator.get_production_recipes(production_branch)[0].__class__.__name__.split("_")),
-				"inputs": Setup_Generator.get_inputs(production_branch), 
-				"outputs": Setup_Generator.get_outputs(production_branch)
-				})
+		
 		
 		#listbox of simple production paths
 		simple_production_paths_text = []
 		for path in self.simple_production_paths:
 			simple_production_paths_text.append(f"{path['name']} - {', '.join([key + ': ' + str(path['inputs'][key]) + '/min' for key in path['inputs'].keys()])} --> {', '.join([key + ': ' + str(path['outputs'][key]) + '/min' for key in path['outputs'].keys()])}")
-		
 		production_path_listbox = Listbox(mainframe, width=80, height=10, listvariable=StringVar(value=simple_production_paths_text))
 		production_path_listbox.grid(column=0, row=1)
 		production_path_listbox.bind("<Double-1>", lambda _: Production_Path_Window(self.root, self.simple_production_paths[production_path_listbox.curselection()[0]], self.production_paths[production_path_listbox.curselection()[0]]))
