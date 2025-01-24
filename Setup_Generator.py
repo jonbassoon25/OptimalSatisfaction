@@ -1,7 +1,6 @@
 import itertools
 import math
 import time
-from PDL import *
 
 import Util
 import Production_Machines
@@ -118,7 +117,7 @@ def get_production_recipes(production_branch):
 			production_recipes += get_production_recipes(production_branch[key][i])
 	return production_recipes
 
-#@memoize_production_path
+
 def get_inputs(production_branch):
 	production_recipes = get_production_recipes(production_branch)
 	inputs = {}
@@ -131,7 +130,7 @@ def get_inputs(production_branch):
 				inputs[recipe_output] = list(recipe.outputs.values())[0]
 	return inputs
 
-#@memoize_production_path
+
 def get_outputs(production_branch):
 	production_recipes = get_production_recipes(production_branch)
 	inputs = {}
@@ -160,7 +159,7 @@ def get_outputs(production_branch):
 		
 	return outputs
 
-#@memoize_production_path
+
 def get_max_energy_use(production_branch):
 	production_recipes = get_production_recipes(production_branch)
 	meu = 0 #max energy use
@@ -168,7 +167,7 @@ def get_max_energy_use(production_branch):
 		meu += recipe.production_machine.maximum_power_draw
 	return meu
 
-#@memoize_production_path
+
 def get_construction_requirements(production_branch):
 	production_recieps = get_production_recipes(production_branch)
 	construction_requirements = {}
@@ -193,27 +192,32 @@ def filter_production_paths(production_paths, output_item, production_rate):
 	Returns:
 		(list): list of filtered production paths
 	'''
-	print("entered")
 	if type(output_item) == type(""):
 		output_item = Items.get_item_by_name(output_item)
 	del_indicies = set()
 
-	for i in range(len(production_paths)):
-		print(i)
+	lp = len(production_paths)
+	for i in range(lp):
+		print(f"{i}/{lp}")
 		#Set constants for the loop
 		production_branch = production_paths[i]
 		branch_max_energy_use = get_max_energy_use(production_branch)
 		branch_requirements = get_construction_requirements(production_branch)
 
+		branch_inputs = get_inputs(production_branch)
+		branch_outputs = get_outputs(production_branch)
+
 		#Check for expected output amount
-		if get_outputs(production_branch)[output_item.name] != production_rate:
+		if branch_outputs[output_item.name] != production_rate:
 			del_indicies.add(i)
 			continue
 
 		#Check for unnecessary intermediary steps
 
 		# A path with unnecessary steps is considered such if it has:
-		#  the same inputs/outputs as another path with a higher electrical consumption
+		#  the same inputs/outputs as another path 
+		#  and 
+		#  has a higher electrical consumption than the other path
 		#  and
 		#  more of each type of construction resource as the other path
 
@@ -224,9 +228,46 @@ def filter_production_paths(production_paths, output_item, production_rate):
 			if j == i or j in del_indicies:
 				continue
 
+			check_branch = production_paths[j]
+
+			#Check input and output resources
+			check_inputs = get_inputs(check_branch)
+			check_outputs = get_outputs(check_branch)
+
+			if len(check_inputs.keys()) != len(branch_inputs.keys()):
+				continue #Input resources cannot be the same if they are of differing lengths
+			if len(check_outputs.keys()) != len(branch_outputs.keys()):
+				continue #Output resources cannot be the same if they are of differing lengths
+
 			#Check electrical consumption of this path to every other path
 			if branch_max_energy_use <= get_max_energy_use(production_paths[j]):
-				continue #first part of the check isn't true, so check is always false regardless of second part
+				continue #this check isn't true, so check is always false regardless of the others
+
+			#Check input resource types
+			broken = False
+			for resource in branch_inputs.keys():
+				if not resource in check_inputs.keys():
+					broken = True
+					break
+				if branch_inputs[resource] != check_inputs[resource]:
+					broken = True
+					break
+			if broken:
+				continue #Loop was broken so the input resources of the paths are not the same
+
+
+			#Check input resource types
+			broken = False
+			for resource in branch_outputs.keys():
+				if not resource in check_outputs.keys():
+					broken = True
+					break
+				if branch_outputs[resource] != check_outputs[resource]:
+					broken = True
+					break
+			if broken:
+				continue #Loop was broken so the output resources of the paths are not the same
+
 
 			#Check construction resources of this path to every other path
 			#Null hypothesis = this branch contains less or an equal amount of each construction resource than any other path
@@ -235,17 +276,18 @@ def filter_production_paths(production_paths, output_item, production_rate):
 			for requirement in check_requirements.keys():
 				if not requirement in branch_requirements.keys():
 					continue #if the resource in the check branch isn't required for this one
+				
 
 				if check_requirements[requirement] >= branch_requirements[requirement]:
 					continue #if the resource in the check branch is more than or equal to the quantity this recipe needs
-
+				
 				#The null hypothesis was never proven so the alternate hypothesis is true and this branch should be removed
 				del_indicies.add(i)
 				break #second part of the check is true, so this production branch can be removed
 	#Remove del indices
 	for index in reversed(sorted(list(del_indicies))):
 		del production_paths[index]
-	print("returned")
+
 	return production_paths
 
 
