@@ -215,7 +215,7 @@ def filter_production_paths(production_paths, output_item, production_rate):
 		#Check for unnecessary intermediary steps
 
 		# A path with unnecessary steps is considered such if it has:
-		#  the same inputs/outputs as another path 
+		#  the same input/output quantities as another path 
 		#  and 
 		#  has a higher electrical consumption than the other path
 		#  and
@@ -223,8 +223,8 @@ def filter_production_paths(production_paths, output_item, production_rate):
 
 		#Check if this path has the same inputs and outputs as any other paths and a higher electrical consumption
 		#Then for each path that it does, check to see if this path has the same or more of each construction resouce of the path thereof
-		for j in range(len(production_paths)):
-			#Don't check the path against itself
+		for j in range(lp):
+			#Don't check the path against itself or ones that have been removed
 			if j == i or j in del_indicies:
 				continue
 
@@ -234,14 +234,17 @@ def filter_production_paths(production_paths, output_item, production_rate):
 			check_inputs = get_inputs(check_branch)
 			check_outputs = get_outputs(check_branch)
 
+
 			if len(check_inputs.keys()) != len(branch_inputs.keys()):
 				continue #Input resources cannot be the same if they are of differing lengths
 			if len(check_outputs.keys()) != len(branch_outputs.keys()):
 				continue #Output resources cannot be the same if they are of differing lengths
 
+
 			#Check electrical consumption of this path to every other path
 			if branch_max_energy_use <= get_max_energy_use(production_paths[j]):
 				continue #this check isn't true, so check is always false regardless of the others
+
 
 			#Check input resource types
 			broken = False
@@ -284,6 +287,7 @@ def filter_production_paths(production_paths, output_item, production_rate):
 				#The null hypothesis was never proven so the alternate hypothesis is true and this branch should be removed
 				del_indicies.add(i)
 				break #second part of the check is true, so this production branch can be removed
+
 	#Remove del indices
 	for index in reversed(sorted(list(del_indicies))):
 		del production_paths[index]
@@ -295,9 +299,13 @@ def sort_production_paths(production_paths, order_of_importance, input_resources
 	pass
 
 
+def sort_on_resource_efficieny(production_paths, efficiency_determinator = "ratio"):
+	pass
+
+
 def optimize_production_paths(sorted_production_paths, resource_rate_limitations, construction_limitations):
 	'''
-	Optimizes production paths to meet resource and construction limitations by using the best possible path until it is no longer possible and then using the next best
+	Optimizes production paths to meet resource and construction limitations
 
 	Parameters:
 		sorted_production_paths (list): list of sorted production paths
