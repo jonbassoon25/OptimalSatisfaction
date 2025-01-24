@@ -1,6 +1,7 @@
 import itertools
 import math
 import time
+from PDL import *
 
 import Util
 import Production_Machines
@@ -118,6 +119,7 @@ def get_production_recipes(production_branch):
 	return production_recipes
 
 
+@memoized
 def get_inputs(production_branch):
 	production_recipes = get_production_recipes(production_branch)
 	inputs = {}
@@ -131,6 +133,7 @@ def get_inputs(production_branch):
 	return inputs
 
 
+@memoized
 def get_outputs(production_branch):
 	production_recipes = get_production_recipes(production_branch)
 	inputs = {}
@@ -160,7 +163,9 @@ def get_outputs(production_branch):
 	return outputs
 
 
+@memoized
 def get_max_energy_use(production_branch):
+	print(production_branch)
 	production_recipes = get_production_recipes(production_branch)
 	meu = 0 #max energy use
 	for recipe in production_recipes:
@@ -168,6 +173,7 @@ def get_max_energy_use(production_branch):
 	return meu
 
 
+@memoized
 def get_construction_requirements(production_branch):
 	production_recieps = get_production_recipes(production_branch)
 	construction_requirements = {}
@@ -197,6 +203,7 @@ def filter_production_paths(production_paths, output_item, production_rate):
 	del_indicies = set()
 
 	lp = len(production_paths)
+	memoized.memory_size = lp
 	for i in range(lp):
 		print(f"{i}/{lp}")
 		#Set constants for the loop
@@ -291,6 +298,8 @@ def filter_production_paths(production_paths, output_item, production_rate):
 	#Remove del indices
 	for index in reversed(sorted(list(del_indicies))):
 		del production_paths[index]
+	
+	memoized.memory_size = 50
 
 	return production_paths
 
