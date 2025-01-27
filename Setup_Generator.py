@@ -165,7 +165,6 @@ def get_outputs(production_branch):
 
 @memoized
 def get_max_energy_use(production_branch):
-	print(production_branch)
 	production_recipes = get_production_recipes(production_branch)
 	meu = 0 #max energy use
 	for recipe in production_recipes:
@@ -214,6 +213,9 @@ def filter_production_paths(production_paths, output_item, production_rate):
 		branch_inputs = get_inputs(production_branch)
 		branch_outputs = get_outputs(production_branch)
 
+		branch_input_keys_length = len(branch_inputs.keys())
+		branch_output_keys_length = len(branch_inputs.keys())
+
 		#Check for expected output amount
 		if branch_outputs[output_item.name] != production_rate:
 			del_indicies.add(i)
@@ -242,9 +244,9 @@ def filter_production_paths(production_paths, output_item, production_rate):
 			check_outputs = get_outputs(check_branch)
 
 
-			if len(check_inputs.keys()) != len(branch_inputs.keys()):
+			if len(check_inputs.keys()) != branch_input_keys_length:
 				continue #Input resources cannot be the same if they are of differing lengths
-			if len(check_outputs.keys()) != len(branch_outputs.keys()):
+			if len(check_outputs.keys()) != branch_output_keys_length:
 				continue #Output resources cannot be the same if they are of differing lengths
 
 
@@ -346,13 +348,14 @@ def generate_setup(output_item_name, production_rate, miner_level, input_resourc
 	#When deciding which branch of a production tree to use, use the best recipe until it is not possible then the second best, and so on unil no recipes are possible or the resource requirement is fufilled
 
 if __name__ == "__main__":
-	item_name = "Plastic"
+	item_name = "Iron Ore"
 	quantity = 10 #per min
 
-	gpt = generate_production_tree(Items.get_item_by_name(item_name), quantity, 1, False)
+	gpt = generate_production_tree(Items.get_item_by_name(item_name), quantity, 1, True)
 	spt = split_production_tree(gpt)
 	print(spt)
 	for production_branch in spt:
+		break
 		print()
 		print(production_branch)
 		print()
