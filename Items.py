@@ -285,6 +285,12 @@ class Circuit_Board(Item):
 	alternate_recipes = [Recipes.Caterium_Circuit_Board, Recipes.Electrode_Circuit_Board, Recipes.Silicon_Circuit_Board]
 	sink_yield = 696
 
+class Computer(Item):
+	name = "Computer"
+	default_recipes = [Recipes.Computer]
+	alternate_recipes = []
+	sink_yield = 0
+
 class Empty_Canister(Item):
 	name = "Empty Canister"
 	default_recipes = [Recipes.Empty_Canister, Recipes.Unpackage_Alumina_Solution, Recipes.Unpackage_Fuel, Recipes.Unpackage_Heavy_Oil_Residue, Recipes.Unpackage_Liquid_Biofuel, Recipes.Unpackage_Oil, Recipes.Unpackage_Sulfuric_Acid, Recipes.Unpackage_Turbofuel, Recipes.Unpackage_Water]

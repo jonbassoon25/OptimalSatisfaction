@@ -72,7 +72,7 @@ class Optimal_Satisfaction_UI:
 		calculate = Button(mainframe, text="Calculate Paths", command=lambda:None)
 		calculate.grid(column=0, row=10, columnspan=2)
 
-		calculate = Button(mainframe, text="test", command=lambda:Production_Paths_Window(root, Setup_Generator.generate_production_tree("Plastic", 60, 2, default_only=False)))
+		calculate = Button(mainframe, text="test", command=lambda:Production_Paths_Window(root, Setup_Generator.generate_production_tree("Computer", 10, 2, default_only=False)))
 		calculate.grid(column=0, row=11, columnspan=2)
 
 
@@ -315,7 +315,7 @@ class Production_Paths_Window:
 
 		self.production_tree = production_tree
 		self.production_paths = Setup_Generator.split_production_tree(production_tree)
-		self.production_paths = Setup_Generator.filter_production_paths(self.production_paths, "Plastic", 60)
+		self.production_paths = Setup_Generator.filter_production_paths(self.production_paths, "Computer", 10)
 		self.simple_production_paths = Setup_Generator.get_simple_production_paths(self.production_paths)
 
 		root.title("Production Paths")

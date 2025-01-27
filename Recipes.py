@@ -292,7 +292,7 @@ class Copper_Ingot(Recipe):
 class Copper_Alloy_Ingot(Recipe):
 	production_machine = PMs.Foundry
 	inputs = {"Copper Ore": 50, "Iron Ore": 50}
-	outputs = {"Copper Ore": 100}
+	outputs = {"Copper Ingot": 100}
 class Leached_Copper_Ingot(Recipe):
 	production_machine = PMs.Refinery
 	inputs = {"Copper Ore": 45, "Sulfuric Acid": 25}
@@ -622,6 +622,11 @@ class Silicon_Circuit_Board(Recipe):
 	production_machine = PMs.Assembler
 	inputs = {"Copper Sheet": 27.5, "Silica": 27.5}
 	outputs = {"Circuit Board": 12.5}
+
+class Computer(Recipe):
+	production_machine = PMs.Manufacturer
+	inputs = {"Circuit Board": 10, "Cable": 20, "Plastic": 40}
+	outputs = {"Computer": 2.5}
 
 class Empty_Canister(Recipe):
 	production_machine = PMs.Constructor
