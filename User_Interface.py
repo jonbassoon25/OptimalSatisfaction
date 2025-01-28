@@ -1,5 +1,6 @@
 from tkinter import *
 from tkinter import ttk
+import json
 
 import Items
 import Setup_Generator
@@ -314,8 +315,16 @@ class Production_Paths_Window:
 		root = self.root
 
 		self.production_tree = production_tree
+		print("Saving Production Tree...")
+
+		with open("text.txt", "w") as dumpFile:
+			dumpFile.write(str(self.production_tree))
+
+		print("Splitting tree...")
 		self.production_paths = Setup_Generator.split_production_tree(production_tree)
+		print("Filtering tree...")
 		self.production_paths = Setup_Generator.filter_production_paths(self.production_paths, "Computer", 10)
+		print("getting simple paths...")
 		self.simple_production_paths = Setup_Generator.get_simple_production_paths(self.production_paths)
 
 		root.title("Production Paths")
