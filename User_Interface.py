@@ -5,6 +5,14 @@ import json
 import Items
 import Setup_Generator
 
+global production_item
+global production_rate
+global production_defaults_only
+
+production_item = "Cable"
+production_rate = 60
+production_defaults_only = False
+
 
 class Optimal_Satisfaction_UI:
 	def __init__(self):
@@ -73,7 +81,7 @@ class Optimal_Satisfaction_UI:
 		calculate = Button(mainframe, text="Calculate Paths", command=lambda:None)
 		calculate.grid(column=0, row=10, columnspan=2)
 
-		calculate = Button(mainframe, text="test", command=lambda:Production_Paths_Window(root, Setup_Generator.generate_production_tree("Computer", 10, 2, default_only=False)))
+		calculate = Button(mainframe, text="test", command=lambda:Production_Paths_Window(root, Setup_Generator.generate_production_tree(production_item, production_rate, 2, default_only=production_defaults_only)))
 		calculate.grid(column=0, row=11, columnspan=2)
 
 
@@ -323,7 +331,7 @@ class Production_Paths_Window:
 		print("Splitting tree...")
 		self.production_paths = Setup_Generator.split_production_tree(production_tree)
 		print("Filtering tree...")
-		self.production_paths = Setup_Generator.filter_production_paths(self.production_paths, "Computer", 10)
+		self.production_paths = Setup_Generator.filter_production_paths(self.production_paths, production_item, production_rate)
 		print("getting simple paths...")
 		self.simple_production_paths = Setup_Generator.get_simple_production_paths(self.production_paths)
 
