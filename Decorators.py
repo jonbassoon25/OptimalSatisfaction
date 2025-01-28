@@ -12,20 +12,21 @@ class Recursive_Production(object):
 	def __init__(self, func):
 		self.func = func
 	
-	def __call__(self, *args, master_proportion = 1):
-		if master_proportion == 1:
-			self.current_progress = 0
+	def __call__(self, *args, **kwargs):
+		return_val = self.func(*args, **kwargs)
 
-		return_val = self.func(*args)
 
-		#Total Recipes
+		#Total Recipes, not complete
 		#self.current_progress += self._calculate_delta_recipe_proportion(...args)
 
-		#Proportional Completion
-		#self.current_progress += self._calculate_proportional_change(...args)
+		#Proportional Completion, not complete
+		#add_proportion, node_proportion = self._calculate_proportional_change(parent_proportion, num_siblings, return_val)
+		#self.current_progress += add_proportion
 
 		#Random Counter
-		self.current_progress = max(1, self.current_progress + self._calculate_random_count_change())
+		self.current_progress = min(1, self.current_progress + self._calculate_random_count_change())
+		print(self.current_progress)
+		
 		return return_val
 	
 	'''
@@ -51,20 +52,20 @@ class Recursive_Production(object):
 		return round(1 / total_recipes, 5)
 	
 
-	def _calculate_proportional_change(self, parent_proportion, sibling_iterations, return_val):
+	def _calculate_proportional_change(self, parent_proportion, num_siblings, return_val):
 		'''
 		Proportional completion = sum of (parent_proportion / iterations) at lowest depth for each recursive path
 
 		Parameters:
 			parent_proportion (float): proportion that the parent would add to the proportional completion if completed
-			sibling_iterations (int): number of siblings that this recipe has (number of children of the recipe's parent)
+			num_siblings (int): number of siblings that this recipe has (number of children of the recipe's parent)
 			return_val (dict): eturn value of the recursive production function for this recipe
 		
 		Returns:
 			(float): change in proportion from the recursive production function completing,
 			(float): parent proportion to use for this recipe's children
 		'''
-		node_proportion = round(parent_proportion / sibling_iterations, 5)
+		node_proportion = round(parent_proportion / num_siblings, 5)
 
 		if len(return_val.keys()) == 1 and list(return_val.values())[0] == []: #return dictionary should only have 1 empty list value for both raw resources & user input resources
 			return node_proportion, node_proportion
