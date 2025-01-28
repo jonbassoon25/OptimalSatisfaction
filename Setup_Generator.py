@@ -1,12 +1,14 @@
 import itertools
 import math
 import time
+
 from PDL import *
 
 import Util
 import Production_Machines
 import Recipes
 import Items
+
 
 def generate_production_tree(output_item, production_rate, miner_level, default_only = True, input_resources = {}, blacklist_recipes = set()):
 	'''
@@ -305,13 +307,38 @@ def filter_production_paths(production_paths, output_item, production_rate):
 
 	return production_paths
 
-
-def sort_production_paths(production_paths, order_of_importance, input_resources):
+#["resource efficiency", "input resources", "byproducts", "construction cost", "electrical consumption"]
+def sort_production_paths(production_paths, order_of_importance, input_resources, resource_efficiency_determinator = "ratio", construction_cost_determinator = "sink"):
+	#Convert order of importance strings to functions
+	for i in range(len(order_of_importance)):
+		if order_of_importance[i] == "resource efficiency":
+			order_of_importance[i] = lambda _production_paths: _sort_on_resource_efficiency(_production_paths, resource_efficiency_determinator)
+		elif order_of_importance[i] == "input resources":
+			order_of_importance[i] = lambda _production_paths: _sort_on_inputs(_production_paths, input_resources)
+		elif order_of_importance[i] == "byproducts":
+			order_of_importance[i] = lambda _production_paths: _sort_on_byproducts(_production_paths)
+		elif order_of_importance[i] == "electrical consumption":
+			order_of_importance[i] = lambda _production_paths: _sort_on_electrical_consumption(_production_paths)
+		elif order_of_importance[i] == "construction cost":
+			order_of_importance[i] = lambda _production_paths: _sort_on_construction_efficiency(_production_paths, construction_cost_determinator)
+	
+def _single_sort_production_paths(production_paths, sort_function):
 	pass
 
+def _sort_on_resource_efficiency(production_paths, efficiency_determinator):
+	pass #efficiency level determined by ratio of input resources in the world, commanlity of input resource in the world, or sink value of input resources
 
-def sort_on_resource_efficieny(production_paths, efficiency_determinator = "ratio"):
+def _sort_on_inputs(production_paths, input_resources):
 	pass
+
+def _sort_on_byproducts(production_paths):
+	pass
+
+def _sort_on_electrical_consumption(production_paths):
+	pass
+
+def _sort_on_construction_efficiency(production_paths, cost_determinator):
+	pass #efficiency level determined by sink value of each construction resource, for now
 
 
 def optimize_production_paths(sorted_production_paths, resource_rate_limitations, construction_limitations):
