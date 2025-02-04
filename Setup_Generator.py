@@ -1,6 +1,8 @@
 import itertools
 import math
 import time
+import sys
+import numpy as np
 
 from PDL import *
 
@@ -8,6 +10,8 @@ import Util
 import Production_Machines
 import Recipes
 import Items
+
+import Production_Tree_Dataclasses
 
 
 def generate_production_tree(output_item, production_rate, miner_level, default_only = True, input_resources = {}, blacklist_recipes = set()):
@@ -185,6 +189,34 @@ def get_construction_requirements(production_branch):
 			else:
 				construction_requirements[key] = recipe.production_machine.construction_requirements[key]
 	return construction_requirements
+
+
+def filter_production_tree(production_tree):
+	'''
+	Filters a production tree to only include paths that:
+	  -  Output the expected amount
+	  -  Don't include unnecessary intermediary steps that increase construction and energy costs
+	
+	Parameters:
+		production_tree (dict): production tree
+	
+	Returns:
+		(dict): filtered production tree
+	'''
+
+	#For each possible output recipe
+	for recipe in production_tree:
+		#Go down to lowest depth
+		sub_requirements = production_tree[recipe]
+		while sub_requirements != []: #while not at the lowest depth
+			if sub_requirements == [{}]:
+				print("Broken item in production tree. Fixing output.")
+				sub_requirements = []
+				break
+
+			for sub_tree in sub_requirements: #for each production possiblity
+				pass#sub_requirements = sub_tree[]
+
 
 
 def filter_production_paths(production_paths, output_item, production_rate):
@@ -375,12 +407,38 @@ def generate_setup(output_item_name, production_rate, miner_level, input_resourc
 	#When deciding which branch of a production tree to use, use the best recipe until it is not possible then the second best, and so on unil no recipes are possible or the resource requirement is fufilled
 
 if __name__ == "__main__":
-	item_name = "Iron Ore"
+	item_name = "Computer"
 	quantity = 10 #per min
 
-	gpt = generate_production_tree(Items.get_item_by_name(item_name), quantity, 1, True)
-	spt = split_production_tree(gpt)
-	print(spt)
+	gpt = generate_production_tree(Items.get_item_by_name(item_name), quantity, 2, False)
+
+	production_tree = Production_Tree_Dataclasses.production_tree(gpt)
+	simple_paths = production_tree.get_simple_paths()
+
+	#print([path.name for path in simple_paths])
+
+
+	#print("num paths starting")
+	#cur_time = time.time()
+	#numeric_paths = [np.array(l, dtype="uint8") for l in Production_Tree_Dataclasses.production_tree(gpt)._get_numeric_paths()]
+	#print(f"Finished in {time.time() - cur_time}s")
+	#print(f"Numeric paths size: {sum([numeric_paths[i].nbytes for i in range(len(numeric_paths))])}b")
+	
+	#time.sleep(1)
+
+	#print("spt starting")
+	#cur_time = time.time()
+	#spt = split_production_tree(gpt)
+	#print(f"Finished in {time.time() - cur_time}s")
+	#print(f"Split production tree size: {sys.getsizeof(spt)}b")
+	
+	quit()
+	for index in range(len(spt)):
+		if not spt[index] == Production_Tree_Dataclasses.production_tree(gpt).get_branch(numeric_paths[index]):
+			print(index)
+
+	'''
+
 	for production_branch in spt:
 		break
 		print()
@@ -394,3 +452,4 @@ if __name__ == "__main__":
 		print(get_inputs(production_branch))
 		print(get_outputs(production_branch))
 		print()
+'''

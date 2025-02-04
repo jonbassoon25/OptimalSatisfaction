@@ -14,7 +14,11 @@ class memoized(object):
 	def __init__(self, func):
 		self.func = func
 		self.cache = {}
-	def __call__(self, parameter):
+	def __call__(self, *args):
+		if len(args) > 1:
+			parameter = args[1]
+		else:
+			parameter = args[0]
 		if not isinstance(parameter, Hashable):
 			parameter_name = id(parameter)
 		else:
@@ -23,7 +27,7 @@ class memoized(object):
 		if parameter_name in self.cache:
 			return self.cache[parameter_name]
 		else:
-			value = self.func(parameter)
+			value = self.func(*args)
 			self.cache[parameter_name] = value
 
 			cache_key_list = list(self.cache.keys())

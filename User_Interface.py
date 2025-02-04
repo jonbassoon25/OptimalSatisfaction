@@ -9,9 +9,9 @@ global production_item
 global production_rate
 global production_defaults_only
 
-production_item = "Cable"
+production_item = "Iron Plate"
 production_rate = 60
-production_defaults_only = False
+production_defaults_only = True
 
 
 class Optimal_Satisfaction_UI:
