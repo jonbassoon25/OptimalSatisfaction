@@ -414,33 +414,9 @@ if __name__ == "__main__":
 
 	production_tree = Production_Tree_Dataclasses.production_tree(gpt)
 	simple_paths = production_tree.get_simple_paths()
-
-	#print([path.name for path in simple_paths])
-
-
-	#print("num paths starting")
-	#cur_time = time.time()
-	#numeric_paths = [np.array(l, dtype="uint8") for l in Production_Tree_Dataclasses.production_tree(gpt)._get_numeric_paths()]
-	#print(f"Finished in {time.time() - cur_time}s")
-	#print(f"Numeric paths size: {sum([numeric_paths[i].nbytes for i in range(len(numeric_paths))])}b")
-	
-	#time.sleep(1)
-
-	#print("spt starting")
-	#cur_time = time.time()
-	#spt = split_production_tree(gpt)
-	#print(f"Finished in {time.time() - cur_time}s")
-	#print(f"Split production tree size: {sys.getsizeof(spt)}b")
-	
-	quit()
-	for index in range(len(spt)):
-		if not spt[index] == Production_Tree_Dataclasses.production_tree(gpt).get_branch(numeric_paths[index]):
-			print(index)
-
-	'''
+	spt = split_production_tree(gpt)
 
 	for production_branch in spt:
-		break
 		print()
 		print(production_branch)
 		print()
@@ -452,4 +428,3 @@ if __name__ == "__main__":
 		print(get_inputs(production_branch))
 		print(get_outputs(production_branch))
 		print()
-'''
