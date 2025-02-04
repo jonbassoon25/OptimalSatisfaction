@@ -385,6 +385,7 @@ class Bolted_Iron_Plate(Recipe):
 class Stitched_Iron_Plate(Recipe):
 	production_machine = PMs.Assembler
 	inputs = {"Iron Plate": 18.75, "Wire": 37.5}
+	outputs = {"Reinforced Iron Plate": 5.625}
 
 class Biomass_A(Recipe):
 	production_machine = PMs.Constructor

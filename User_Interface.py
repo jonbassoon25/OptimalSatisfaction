@@ -78,15 +78,17 @@ class Optimal_Satisfaction_UI:
 		construction_limit_display = Display_Box(mainframe, root, text="Construction Limits", content=self.construction_limits, allow_zero=True)
 		construction_limit_display.grid(column=7, row=1, columnspan=2, padx=5, sticky="NW")
 
-		calculate = Button(mainframe, text="Calculate Paths", command=lambda:None)
+		
+		calculate = Button(mainframe, text="Calculate Paths", command=lambda:Production_Paths_Window(self, root, self._generate_production_tree()))
 		calculate.grid(column=0, row=10, columnspan=2)
-
-		calculate = Button(mainframe, text="test", command=lambda:Production_Paths_Window(root, Setup_Generator.generate_production_tree(production_item, production_rate, 2, default_only=production_defaults_only)))
-		calculate.grid(column=0, row=11, columnspan=2)
 
 
 		#ds = Drag_Sort(root, ["Hello", "World", "test", "test", "test"])
 		#ds.grid(column=0, row=5)
+
+	def _generate_production_tree(self):
+		print(f"Generating production tree for {self.output_str.get()} with values:\n\tproduction rate: {int(self.production_rate_str.get())}\n\tminer level: {self.miner_tier.get()}\n\trecipe type: {self.recipe_type.get()}")
+		return Setup_Generator.generate_production_tree(self.output_str.get(), int(self.production_rate_str.get()), 2, default_only=self.recipe_type.get() == "default")
 	
 
 	def mainloop(self):
@@ -318,7 +320,7 @@ class Drag_Sort(Canvas):
 
 
 class Production_Paths_Window:
-	def __init__(self, root, production_tree):
+	def __init__(self, main_window, root, production_tree):
 		self.root = Toplevel(root)
 		root = self.root
 
@@ -331,7 +333,7 @@ class Production_Paths_Window:
 		print("Splitting tree...")
 		self.production_paths = Setup_Generator.split_production_tree(production_tree)
 		print("Filtering tree...")
-		self.production_paths = Setup_Generator.filter_production_paths(self.production_paths, production_item, production_rate)
+		self.production_paths = Setup_Generator.filter_production_paths(self.production_paths, main_window.output_str.get(), int(main_window.production_rate_str.get()))
 		print("getting simple paths...")
 		self.simple_production_paths = Setup_Generator.get_simple_production_paths(self.production_paths)
 

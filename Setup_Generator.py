@@ -407,10 +407,10 @@ def generate_setup(output_item_name, production_rate, miner_level, input_resourc
 	#When deciding which branch of a production tree to use, use the best recipe until it is not possible then the second best, and so on unil no recipes are possible or the resource requirement is fufilled
 
 if __name__ == "__main__":
-	item_name = "Computer"
+	item_name = "Versatile Framework"
 	quantity = 10 #per min
 
-	gpt = generate_production_tree(Items.get_item_by_name(item_name), quantity, 2, False)
+	gpt = generate_production_tree(Items.get_item_by_name(item_name), quantity, 2, True)
 
 	production_tree = Production_Tree_Dataclasses.production_tree(gpt)
 	simple_paths = production_tree.get_simple_paths()
