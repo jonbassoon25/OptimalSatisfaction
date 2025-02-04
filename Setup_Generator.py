@@ -251,6 +251,8 @@ def filter_production_paths(production_paths, output_item, production_rate):
 		branch_output_keys_length = len(branch_inputs.keys())
 
 		#Check for expected output amount
+		if not output_item.name in branch_outputs.keys(): #Shouldn't need, but do if recipes were misinputed
+			raise Exception(f"Output not in output items: {output_item.name}")
 		if branch_outputs[output_item.name] != production_rate:
 			del_indicies.add(i)
 			continue

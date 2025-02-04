@@ -5,14 +5,6 @@ import json
 import Items
 import Setup_Generator
 
-global production_item
-global production_rate
-global production_defaults_only
-
-production_item = "Iron Plate"
-production_rate = 60
-production_defaults_only = True
-
 
 class Optimal_Satisfaction_UI:
 	def __init__(self):
@@ -87,8 +79,18 @@ class Optimal_Satisfaction_UI:
 		#ds.grid(column=0, row=5)
 
 	def _generate_production_tree(self):
+		if int(self.production_rate_str.get()) == 0 or self.output_str.get() == "":
+			return None
 		print(f"Generating production tree for {self.output_str.get()} with values:\n\tproduction rate: {int(self.production_rate_str.get())}\n\tminer level: {self.miner_tier.get()}\n\trecipe type: {self.recipe_type.get()}")
-		return Setup_Generator.generate_production_tree(self.output_str.get(), int(self.production_rate_str.get()), 2, default_only=self.recipe_type.get() == "default")
+		if self.miner_tier.get() == "mk1":
+			miner_tier = 1
+		elif self.miner_tier.get() == "mk2":
+			miner_tier = 2
+		elif self.miner_tier.get() == "mk3":
+			miner_tier = 3
+		else:
+			raise Exception(f"Unrecognized miner tier from self.miner_tier: {self.miner_tier.get}")
+		return Setup_Generator.generate_production_tree(self.output_str.get(), int(self.production_rate_str.get()), miner_tier, default_only=self.recipe_type.get() == "default")
 	
 
 	def mainloop(self):
@@ -96,7 +98,7 @@ class Optimal_Satisfaction_UI:
 
 
 	def calculate_production_rate(self):
-		'''Calculates production rate from inputs, updates production rate input box to match the calculated value, and disables user input to that box'''
+		'''Calculates production rate from inputs and updates production rate input box to match the calculated value'''
 		print("Calc production rate")
 	
 
@@ -321,6 +323,9 @@ class Drag_Sort(Canvas):
 
 class Production_Paths_Window:
 	def __init__(self, main_window, root, production_tree):
+		if production_tree == None:
+			return
+		
 		self.root = Toplevel(root)
 		root = self.root
 
