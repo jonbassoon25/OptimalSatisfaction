@@ -16,9 +16,6 @@ def print_production_tree(production_tree, current_print_str = [], current_colum
 
 		depth_prefix = (("  " * (depth-1)) if depth > 0 else "")
 		for column_index in current_columns:
-			print()
-			print(column_index)
-			print(depth)
 			if depth == column_index:
 				continue
 			depth_prefix = list(depth_prefix)

@@ -51,14 +51,10 @@ class Production_Machine:
 		#Correct power draw for somersloop production amplifier
 		self.maximum_power_draw = self.maximum_power_draw * round((1 + (filled_somersloop_slots / self.total_somersloop_slots)) ** 2, 3)
 
-
 		self.maximum_power_draw *= num_machines
-
-		print("machines:", math.ceil(num_machines))
 
 		self.construction_requirements = self.construction_requirements.copy()
 		for resource in self.construction_requirements.keys():
-			print(self.__class__.construction_requirements)
 			self.construction_requirements[resource] *= math.ceil(num_machines)
 
 

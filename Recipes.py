@@ -17,14 +17,10 @@ class Recipe:
 		self.outputs = Util.copy_flat_dict(self.outputs)
 
 		self.quantity_multiplier = quantity_multiplier
-		print(quantity_multiplier)
 		for input in self.inputs.keys():
 			self.inputs[input] *= self.quantity_multiplier
 		for output in self.outputs.keys():
 			self.outputs[output] *= self.quantity_multiplier
-
-		print(quantity_multiplier)
-		print(self.quantity_multiplier)
 
 		self.production_machine = self.production_machine(num_machines=quantity_multiplier)
 

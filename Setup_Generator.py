@@ -81,8 +81,6 @@ def generate_production_tree(output_item, production_rate, miner_level, default_
 
 		recipe_quantity = production_rate / recipe.outputs[output_item.name]
 		recipe = recipe(recipe_quantity)
-		print(recipe.production_machine)
-		print(recipe.production_machine.maximum_power_draw)
 		production_tree[recipe] = []
 
 		next_blacklist_recipes = blacklist_recipes.copy()
@@ -191,34 +189,6 @@ def get_construction_requirements(production_branch):
 			else:
 				construction_requirements[key] = recipe.production_machine.construction_requirements[key]
 	return construction_requirements
-
-
-def filter_production_tree(production_tree):
-	'''
-	Filters a production tree to only include paths that:
-	  -  Output the expected amount
-	  -  Don't include unnecessary intermediary steps that increase construction and energy costs
-	
-	Parameters:
-		production_tree (dict): production tree
-	
-	Returns:
-		(dict): filtered production tree
-	'''
-
-	#For each possible output recipe
-	for recipe in production_tree:
-		#Go down to lowest depth
-		sub_requirements = production_tree[recipe]
-		while sub_requirements != []: #while not at the lowest depth
-			if sub_requirements == [{}]:
-				print("Broken item in production tree. Fixing output.")
-				sub_requirements = []
-				break
-
-			for sub_tree in sub_requirements: #for each production possiblity
-				pass#sub_requirements = sub_tree[]
-
 
 
 def filter_production_paths(production_paths, output_item, production_rate):
