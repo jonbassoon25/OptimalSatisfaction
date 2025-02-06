@@ -25,18 +25,13 @@ class Optimal_Satisfaction_UI:
 		output_combo.state(["readonly"])
 		output_combo.grid(column=0, row=1, sticky="W", columnspan=2)
 
-		ttk.Label(mainframe).grid(column=0, row=2, columnspan=2)
-
 		ttk.Label(mainframe, text="Production rate (items/min): ").grid(column=0, row=3, sticky="W", columnspan=2)
 
 		self.production_rate_str = StringVar(value="0")
-		production_rate_inputbox = ttk.Entry(mainframe, textvariable=self.production_rate_str, width=9)
+		production_rate_inputbox = ttk.Entry(mainframe, textvariable=self.production_rate_str, width=8)
 		production_rate_inputbox.bind("<FocusOut>", lambda _: self.finalize_production_rate_input())
 		self.production_rate_str.trace_add("write", lambda *_: self.validate_production_rate_input())
 		production_rate_inputbox.grid(column=1, row=3, sticky="E")
-
-		automatic_production_rate_checkbox = ttk.Button(mainframe, text="Calculate production rate from inputs", command=self.calculate_production_rate)
-		automatic_production_rate_checkbox.grid(column=0, row=4, sticky="W", columnspan=2)
 
 		ttk.Label(mainframe).grid(column=0, row=5, columnspan=2)
 
@@ -355,7 +350,7 @@ class Production_Paths_Window:
 		#listbox of simple production paths
 		simple_production_paths_text = []
 		for path in self.simple_production_paths:
-			simple_production_paths_text.append(f"{path['name']} - {', '.join([key + ': ' + str(path['inputs'][key]) + '/min' for key in path['inputs'].keys()])} --> {', '.join([key + ': ' + str(path['outputs'][key]) + '/min' for key in path['outputs'].keys()])}")
+			simple_production_paths_text.append(f"{path['name']} - {', '.join([key + ': ' + str(round(path['inputs'][key], 2)) + '/min' for key in path['inputs'].keys()])} --> {', '.join([key + ': ' + str(round(path['outputs'][key], 2)) + '/min' for key in path['outputs'].keys()])}")
 		production_path_listbox = Listbox(mainframe, width=80, height=10, listvariable=StringVar(value=simple_production_paths_text))
 		production_path_listbox.grid(column=0, row=1)
 		production_path_listbox.bind("<Double-1>", lambda _: Production_Path_Window(self.root, self.simple_production_paths[production_path_listbox.curselection()[0]], self.production_paths[production_path_listbox.curselection()[0]]))
@@ -372,7 +367,7 @@ class Production_Path_Window:
 		mainframe = ttk.Frame(root, padding="10 10")
 		mainframe.grid(column=0, row=0)
 
-		Label(mainframe, text=f"Maximum Energy Consumption: {Setup_Generator.get_max_energy_use(production_path)} MW").grid(column=0, row=2, columnspan=2, sticky="W")
+		Label(mainframe, text=f"Maximum Energy Consumption: {round(Setup_Generator.get_max_energy_use(production_path), 2)} MW").grid(column=0, row=2, columnspan=2, sticky="W")
 
 		construction_requirments_frame = Frame(mainframe)
 		construction_requirments_frame.grid(column=0, row=3, padx=10, pady=10, rowspan=3, sticky="NW")
@@ -383,7 +378,7 @@ class Production_Path_Window:
 		construction_requirments = Setup_Generator.get_construction_requirements(production_path)
 		for i in range(len(construction_requirments.keys())):
 			key = list(construction_requirments.keys())[i]
-			Label(construction_requirments_frame, text=f"{key}: {construction_requirments[key]}").grid(column=0, row=i+1, padx=10, sticky="W")
+			Label(construction_requirments_frame, text=f"{key}: {round(construction_requirments[key], 4)}").grid(column=0, row=i+1, padx=10, sticky="W")
 
 		input_frame = Frame(mainframe)
 		input_frame.grid(column=1, row=3, padx=10, pady=10, sticky="NW")
@@ -393,7 +388,7 @@ class Production_Path_Window:
 		Label(input_frame, text="Inputs:").grid(column=0, row=0, sticky="W")
 		for i in range(len(simple_production_path["inputs"].keys())):
 			key = list(simple_production_path["inputs"].keys())[i]
-			Label(input_frame, text=f"{key}: {simple_production_path['inputs'][key]}").grid(column=0, row=i+1, padx=10, sticky="W")
+			Label(input_frame, text=f"{key}: {round(simple_production_path['inputs'][key], 4)}").grid(column=0, row=i+1, padx=10, sticky="W")
 
 
 		output_frame = Frame(mainframe)
@@ -404,7 +399,7 @@ class Production_Path_Window:
 		Label(output_frame, text="Outputs:").grid(column=0, row=0, sticky="W")
 		for i in range(len(simple_production_path["outputs"].keys())):
 			key = list(simple_production_path["outputs"].keys())[i]
-			Label(output_frame, text=f"{key}: {simple_production_path['outputs'][key]}").grid(column=0, row=i+1, padx=10, sticky="W")
+			Label(output_frame, text=f"{key}: {round(simple_production_path['outputs'][key], 4)}").grid(column=0, row=i+1, padx=10, sticky="W")
 
 		view_path_tree_button = Button(mainframe, text="View Production Tree", command=lambda:Production_Path_Tree_Window(self.root, simple_production_path, production_path))
 		view_path_tree_button.grid(column=1, row=5, sticky="N")
