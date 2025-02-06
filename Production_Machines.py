@@ -38,7 +38,7 @@ class Production_Machine:
 
 	construction_requirements = {}
 
-	def __init__(self, clock_speed = 1.0, filled_somersloop_slots = 0):
+	def __init__(self, num_machines, clock_speed = 1.0, filled_somersloop_slots = 0):
 		self.clock_speed = clock_speed
 		if self.total_somersloop_slots == 0:
 			self.production_amplification_multiplier = 1
@@ -46,17 +46,29 @@ class Production_Machine:
 			self.production_amplification_multiplier = 1 + round(filled_somersloop_slots / self.total_somersloop_slots, 2)
 
 		#Correct power draw for overclock
-		self.maximum_power_draw = round((self.clock_speed / 100) ** math.log2(2.5), 2)
+		self.maximum_power_draw = self.maximum_power_draw * round((self.clock_speed) ** math.log2(2.5), 3)
 
 		#Correct power draw for somersloop production amplifier
-		self.maximum_power_draw = round((1 + (filled_somersloop_slots / self.total_somersloop_slots)) ** 2, 2)
+		self.maximum_power_draw = self.maximum_power_draw * round((1 + (filled_somersloop_slots / self.total_somersloop_slots)) ** 2, 3)
+
+
+		self.maximum_power_draw *= num_machines
+
+		print("machines:", math.ceil(num_machines))
+
+		self.construction_requirements = self.construction_requirements.copy()
+		for resource in self.construction_requirements.keys():
+			print(self.__class__.construction_requirements)
+			self.construction_requirements[resource] *= math.ceil(num_machines)
+
+
 
 
 class Resource_Miner(Production_Machine):
 	resource_node = None
 
-	def __init__(self, resource_node, clock_speed = 1.0): #No production amplification
-		super().__init__(clock_speed)
+	def __init__(self, num_machines, resource_node = None, clock_speed = 1.0): #No production amplification
+		super().__init__(num_machines, clock_speed)
 		self.resource_node = resource_node	
 
 class Resource_Miner_MK1(Resource_Miner):
@@ -118,9 +130,6 @@ class Water_Extractor(Resource_Miner):
 		"Reinforced Iron Plate": 10,
 		"Rotor": 10
 	}
-
-	def __init__(self, clock_speed = 1.0):
-		super().__init__(clock_speed)
 
 class Converter(Production_Machine):
 	maximum_power_draw = 400

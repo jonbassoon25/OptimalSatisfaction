@@ -81,6 +81,8 @@ def generate_production_tree(output_item, production_rate, miner_level, default_
 
 		recipe_quantity = production_rate / recipe.outputs[output_item.name]
 		recipe = recipe(recipe_quantity)
+		print(recipe.production_machine)
+		print(recipe.production_machine.maximum_power_draw)
 		production_tree[recipe] = []
 
 		next_blacklist_recipes = blacklist_recipes.copy()
@@ -185,7 +187,7 @@ def get_construction_requirements(production_branch):
 	for recipe in production_recieps:
 		for key in recipe.production_machine.construction_requirements:
 			if key in construction_requirements.keys():
-				construction_requirements[key] += recipe.production_machine.construction_requirements[key] * math.ceil(recipe.quantity_multiplier)
+				construction_requirements[key] += recipe.production_machine.construction_requirements[key]
 			else:
 				construction_requirements[key] = recipe.production_machine.construction_requirements[key]
 	return construction_requirements
@@ -238,7 +240,8 @@ def filter_production_paths(production_paths, output_item, production_rate):
 	lp = len(production_paths)
 	memoized.memory_size = lp
 	for i in range(lp):
-		print(f"{i}/{lp}")
+		if i % 50 == 0:
+			print(f"{i}/{lp}")
 		#Set constants for the loop
 		production_branch = production_paths[i]
 		branch_max_energy_use = get_max_energy_use(production_branch)
@@ -409,10 +412,10 @@ def generate_setup(output_item_name, production_rate, miner_level, input_resourc
 	#When deciding which branch of a production tree to use, use the best recipe until it is not possible then the second best, and so on unil no recipes are possible or the resource requirement is fufilled
 
 if __name__ == "__main__":
-	item_name = "Versatile Framework"
+	item_name = "Rotor"
 	quantity = 10 #per min
 
-	gpt = generate_production_tree(Items.get_item_by_name(item_name), quantity, 2, True)
+	gpt = generate_production_tree(Items.get_item_by_name(item_name), quantity, 2, False)
 
 	production_tree = Production_Tree_Dataclasses.production_tree(gpt)
 	simple_paths = production_tree.get_simple_paths()
