@@ -1,8 +1,4 @@
 import itertools
-import math
-import time
-import sys
-import numpy as np
 
 from PDL import *
 
