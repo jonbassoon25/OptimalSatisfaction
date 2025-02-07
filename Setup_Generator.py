@@ -314,36 +314,73 @@ def filter_production_paths(production_paths, output_item, production_rate):
 #["resource efficiency", "input resources", "byproducts", "construction cost", "electrical consumption"]
 def sort_production_paths(production_paths, order_of_importance, input_resources, resource_efficiency_determinator = "ratio", construction_cost_determinator = "sink"):
 	#Convert order of importance strings to functions
+	weight_order = []
 	for i in range(len(order_of_importance)):
 		if order_of_importance[i] == "resource efficiency":
-			order_of_importance[i] = lambda _production_paths: _sort_on_resource_efficiency(_production_paths, resource_efficiency_determinator)
+			weight_order.append(lambda production_path: _get_resource_efficiency_weight(production_path, resource_efficiency_determinator))
 		elif order_of_importance[i] == "input resources":
-			order_of_importance[i] = lambda _production_paths: _sort_on_inputs(_production_paths, input_resources)
+			weight_order.append(lambda production_path: _get_input_weight(production_path, input_resources))
 		elif order_of_importance[i] == "byproducts":
-			order_of_importance[i] = lambda _production_paths: _sort_on_byproducts(_production_paths)
+			weight_order.append(lambda production_path: _get_byproduct_weight(production_path))
 		elif order_of_importance[i] == "electrical consumption":
-			order_of_importance[i] = lambda _production_paths: _sort_on_electrical_consumption(_production_paths)
+			weight_order.append(lambda production_path: _get_electrical_consumption_weight(production_path))
 		elif order_of_importance[i] == "construction cost":
-			order_of_importance[i] = lambda _production_paths: _sort_on_construction_efficiency(_production_paths, construction_cost_determinator)
+			weight_order.append(lambda production_path: _get_construction_efficiency_weight(production_path, construction_cost_determinator))
+		else:
+			raise Exception(f"Importance identifier: {order_of_importance[i]} not recognized.")
 	
-def _single_sort_production_paths(production_paths, sort_function):
+def _weight_production_paths(production_paths, weight_lambda):
+	production_paths_by_weight = {}
+
+	#get path weights
+	for path in production_paths:
+		path_weight = weight_lambda(path)
+		if path_weight in production_paths_by_weight.keys():
+			production_paths_by_weight[path_weight].append(path)
+		else:
+			production_paths_by_weight[path_weight] = [path]
+	
+	#sort path weights from smallest to largest
+	sorted_ppbw = {}
+	key_list = list(production_paths_by_weight.keys())
+	for i in range(len(production_paths_by_weight.keys())):
+		smallest_weight = key_list[i]
+		for j in range(len(production_paths_by_weight.keys())):
+			if key_list[j] in sorted_ppbw.keys():
+				continue
+			check_weight = key_list[j]
+			if check_weight > smallest_weight:
+				smallest_weight = check_weight
+
+		sorted_ppbw[smallest_weight] = production_paths_by_weight[smallest_weight]
+	
+	return sorted_ppbw
+			
+
+def _get_resource_efficiency_weight(production_path, efficiency_determinator):
+	pass #efficiency level determined by ratio of input resources in the world, commonality of input resource in the world, or sink value of input resources
+
+def _get_input_weight(production_path, input_resources):
 	pass
 
-def _sort_on_resource_efficiency(production_paths, efficiency_determinator):
-	pass #efficiency level determined by ratio of input resources in the world, commanlity of input resource in the world, or sink value of input resources
-
-def _sort_on_inputs(production_paths, input_resources):
+def _get_byproduct_weight(production_paths):
 	pass
 
-def _sort_on_byproducts(production_paths):
+def _get_electrical_consumption_weight(production_paths):
 	pass
 
-def _sort_on_electrical_consumption(production_paths):
-	pass
-
-def _sort_on_construction_efficiency(production_paths, cost_determinator):
+def _get_construction_efficiency_weight(production_paths, cost_determinator):
 	pass #efficiency level determined by sink value of each construction resource, for now
 
+def _get_resource_weight(item, determinator):
+	if determinator == "ratio":
+		pass
+	elif determinator == "commonality":
+		pass
+	elif determinator == "sink":
+		pass
+	else:
+		raise Exception(f"Determinator: {determinator} not recognized")
 
 def optimize_production_paths(sorted_production_paths, resource_rate_limitations, construction_limitations):
 	'''
