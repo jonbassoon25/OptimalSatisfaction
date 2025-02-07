@@ -2,8 +2,6 @@ import joblib
 import json
 import numpy as np
 
-import Items
-
 class Resource_Data:
 	resource_ratios = {}
 	resource_commonality_table = [] #keys of resource ratios
@@ -22,7 +20,6 @@ class Resource_Data:
 			node_data = json.load(node_data_file)
 		with open("./Resource_Data_Files/resource_well_data.json") as well_data_file:
 			well_data = json.load(well_data_file)
-
 
 		resource_ratios = {}
 		
@@ -48,7 +45,6 @@ class Resource_Data:
 				resource_commonality_weight = well_data[key]["Impure"] + well_data[key]["Normal"] * 2 + well_data[key]["Pure"] * 4
 				resource_ratios[key] = 1 / resource_commonality_weight
 
-		
 		#build the commonality table (most common to least common) and assign ordered resource ratios
 		rct = [] #resource commonality table
 		resource_ratio_key_list = list(resource_ratios.keys())
