@@ -17,7 +17,6 @@ class Resource_Data:
 	def compile_resource_files(cls):
 		node_data = {}
 		well_data = {}
-		item_data = Items.resources
 
 		with open("./Resource_Data_Files/resource_node_data.json") as node_data_file:
 			node_data = json.load(node_data_file)
