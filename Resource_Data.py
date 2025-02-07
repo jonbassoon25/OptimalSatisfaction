@@ -9,14 +9,6 @@ class Resource_Data:
 	resource_commonality_table = [] #keys of resource ratios
 
 	@classmethod
-	def get_item_ratio_weight(cls, item):
-		pass
-
-	@classmethod
-	def get_item_commonality_weight(cls, item):
-		pass
-
-	@classmethod
 	def load_data_from_pack(cls, save_pack):
 		cls.resource_ratios = save_pack["resource ratios"]
 		cls.resource_commonality_table = save_pack["commonality table"]
