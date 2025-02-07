@@ -307,6 +307,7 @@ def filter_production_paths(production_paths, output_item, production_rate):
 		del production_paths[index]
 	
 	memoized.memory_size = 50
+	memoized.reset_memory()
 
 	return production_paths
 

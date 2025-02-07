@@ -11,9 +11,18 @@ class memoized(object):
 		(not reevaluated).
 	'''
 	memory_size = 10
+	cls_obj_refs = []
+
+	@classmethod
+	def reset_memory(cls):
+		for obj_ref in cls.cls_obj_refs:
+			obj_ref.cache = {}
+
 	def __init__(self, func):
 		self.func = func
 		self.cache = {}
+		self.cls_obj_refs.append(self)
+
 	def __call__(self, *args):
 		if len(args) > 1:
 			parameter = args[1]
