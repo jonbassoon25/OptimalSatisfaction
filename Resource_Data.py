@@ -70,6 +70,13 @@ class Resource_Data:
 if __name__ == "__main__":
 	#compile resource data
 	Resource_Data.compile_resource_files()
+
+	#save resource files as plaintext for viewing
+	with open("./Resource_Data_Files/resource_ratios.txt", "w") as rr_file:
+		rr_file.write('\n'.join([f"{key}: {Resource_Data.resource_ratios[key]}" for key in Resource_Data.resource_ratios]))
+	with open("./Resource_Data_Files/resource_commonality_table.txt", "w") as rc_file:
+		rc_file.write('\n'.join(Resource_Data.resource_commonality_table))
+	print("Resource data view-files generated in ./Resource_Data_Files")
 else:
 	#load resource data
 	try:
