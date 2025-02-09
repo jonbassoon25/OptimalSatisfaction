@@ -334,7 +334,9 @@ class Production_Paths_Window:
 		self.production_paths = Setup_Generator.split_production_tree(production_tree)
 		print("Filtering tree...")
 		self.production_paths = Setup_Generator.filter_production_paths(self.production_paths, main_window.output_str.get(), int(main_window.production_rate_str.get()))
-		print("getting simple paths...")
+		print("Sorting tree...")
+		self.production_paths = Setup_Generator.sort_production_paths(self.production_paths, main_window.output_str.get(), ["resource efficiency", "input resources", "byproducts", "electrical consumption", "construction cost"], {})
+		print("Getting simple paths...")
 		self.simple_production_paths = Setup_Generator.get_simple_production_paths(self.production_paths)
 
 		root.title("Production Paths")

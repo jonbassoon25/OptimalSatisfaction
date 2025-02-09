@@ -6,6 +6,7 @@ import Util
 import Production_Machines
 import Recipes
 import Items
+from Resource_Data import Resource_Data
 
 import Production_Tree_Dataclasses
 
@@ -307,12 +308,11 @@ def filter_production_paths(production_paths, output_item, production_rate):
 		del production_paths[index]
 	
 	memoized.memory_size = 50
-	memoized.reset_memory()
 
 	return production_paths
 
-#["resource efficiency", "input resources", "byproducts", "construction cost", "electrical consumption"]
-def sort_production_paths(production_paths, order_of_importance, input_resources, resource_efficiency_determinator = "ratio", construction_cost_determinator = "sink"):
+#["resource efficiency", "input resources", "byproducts", "electrical consumption", "construction cost"]
+def sort_production_paths(production_paths, output_resource_name, order_of_importance, input_resources, resource_efficiency_determinator = "ratio", construction_cost_determinator = "sink"):
 	#Convert order of importance strings to functions
 	weight_order = []
 	for i in range(len(order_of_importance)):
@@ -321,7 +321,7 @@ def sort_production_paths(production_paths, order_of_importance, input_resources
 		elif order_of_importance[i] == "input resources":
 			weight_order.append(lambda production_path: _get_input_weight(production_path, input_resources))
 		elif order_of_importance[i] == "byproducts":
-			weight_order.append(lambda production_path: _get_byproduct_weight(production_path))
+			weight_order.append(lambda production_path: _get_byproduct_weight(production_path, output_resource_name))
 		elif order_of_importance[i] == "electrical consumption":
 			weight_order.append(lambda production_path: _get_electrical_consumption_weight(production_path))
 		elif order_of_importance[i] == "construction cost":
@@ -329,12 +329,17 @@ def sort_production_paths(production_paths, order_of_importance, input_resources
 		else:
 			raise Exception(f"Importance identifier: {order_of_importance[i]} not recognized.")
 	
-def _weight_production_paths(production_paths, weight_lambda):
+	sorted_paths = _get_sorted_production_paths(production_paths, weight_order)
+	
+	return sorted_paths
+	
+
+def _get_sorted_production_paths(production_paths, ordered_weight_lambdas):
 	production_paths_by_weight = {}
 
 	#get path weights
 	for path in production_paths:
-		path_weight = weight_lambda(path)
+		path_weight = ordered_weight_lambdas[0](path)
 		if path_weight in production_paths_by_weight.keys():
 			production_paths_by_weight[path_weight].append(path)
 		else:
@@ -343,44 +348,123 @@ def _weight_production_paths(production_paths, weight_lambda):
 	#sort path weights from smallest to largest
 	sorted_ppbw = {}
 	key_list = list(production_paths_by_weight.keys())
-	for i in range(len(production_paths_by_weight.keys())):
+	for i in range(len(key_list)):
 		smallest_weight = key_list[i]
 		for j in range(len(production_paths_by_weight.keys())):
 			if key_list[j] in sorted_ppbw.keys():
 				continue
+			if smallest_weight in sorted_ppbw.keys():
+				smallest_weight = key_list[j]
+				continue
 			check_weight = key_list[j]
-			if check_weight > smallest_weight:
+			if check_weight < smallest_weight:
 				smallest_weight = check_weight
 
 		sorted_ppbw[smallest_weight] = production_paths_by_weight[smallest_weight]
+
+	#change sorted ppbw into an array without keys
+	sorted_production_paths = []
+	append_flag = False
+	for value in sorted_ppbw.values():
+		if len(value) == 1:
+			sorted_production_paths.append(value[0])
+		else:
+			sorted_production_paths.append(value)
+			append_flag = True
+
+	if append_flag: #if there is more than one sorted production path with values of the same weight
+		#call this function with one less ordered weight lambda for each key with more than one value in its array
+		for i in range(len(sorted_production_paths) - 1, -1, -1):
+			if type(sorted_production_paths[i]) == list:
+				if len(ordered_weight_lambdas) > 1:
+					print("-")
+					new_sorted_paths = _get_sorted_production_paths(sorted_production_paths.pop(i), ordered_weight_lambdas[1:])
+					print("-")
+				else:
+					print("Warning: There are multiple paths of equal weight.")
+					new_sorted_paths = sorted_production_paths.pop(i)
+
+				#Add paths to full storted production path list
+				for path in reversed(new_sorted_paths):
+					sorted_production_paths.insert(i, path)
+
+	if len(sorted_production_paths) != len(production_paths):
+		raise Exception(f"{len(production_paths) - len(sorted_production_paths)} paths were deleted in sort of lambda {5 - len(ordered_weight_lambdas)}")
 	
-	return sorted_ppbw
+	return sorted_production_paths
 			
 
-def _get_resource_efficiency_weight(production_path, efficiency_determinator):
-	pass #efficiency level determined by ratio of input resources in the world, commonality of input resource in the world, or sink value of input resources
+def _get_resource_efficiency_weight(production_path, efficiency_determinator = "ratio"):
+	#efficiency level determined by ratio of input resources in the world, commonality of input resource in the world, or sink value of input resources
+	inputs = get_inputs(production_path)
+	weight = 0
+	for input in inputs.keys():
+		weight += _get_resource_weight(input, efficiency_determinator) * inputs[input]
+		print(f"weight of {inputs[input]} {input} is {_get_resource_weight(input, efficiency_determinator) * inputs[input]}")
+	
+	return weight
+
 
 def _get_input_weight(production_path, input_resources):
-	pass
+	#based on avg proportion of input resources used
+	inputs = get_inputs(production_path)
+	input_resources = input_resources.copy()
+	weight = 0
+	for input_resource in input_resources.keys():
+		if input_resource in inputs.keys():
+			input_resources[input] = 1 - (max(0, input_resources[input_resource] - inputs[input_resource]) / input_resources[input_resource])
+		weight += input_resources[input]
+	
+	if len(input_resources.keys()) > 0:
+		return weight / len(input_resources.keys())
+	else:
+		return 0
 
-def _get_byproduct_weight(production_paths):
-	pass
 
-def _get_electrical_consumption_weight(production_paths):
-	pass
+def _get_byproduct_weight(production_path, output_resource_name):
+	#based on sink value of byproducts
+	outputs = get_outputs(production_path)
+	weight = 0
+	for output in list(outputs.keys()):
+		if output == output_resource_name:
+			continue #this resource is the desired output
+		weight += _get_resource_weight(output, "sink") * outputs[output]
+	
+	return weight
 
-def _get_construction_efficiency_weight(production_paths, cost_determinator):
-	pass #efficiency level determined by sink value of each construction resource, for now
 
-def _get_resource_weight(item, determinator):
+def _get_electrical_consumption_weight(production_path):
+	return get_max_energy_use(production_path)
+
+
+def _get_construction_efficiency_weight(production_path, cost_determinator = "sink"):
+	#efficiency level determined by sink value of each construction resource, for now
+	construction_requirements = get_construction_requirements(production_path)
+	weight = 0
+	for requirement in construction_requirements.keys():
+		weight += _get_resource_weight(requirement, cost_determinator) * construction_requirements[requirement]
+
+	return weight
+
+
+def _get_resource_weight(resource_name, determinator):
 	if determinator == "ratio":
-		pass
+		if not resource_name in Resource_Data.resource_ratios:
+			return 0 #input resources not in the ratios table are either supplied by player or are water
+		return Resource_Data.resource_ratios[resource_name]
 	elif determinator == "commonality":
-		pass
+		if not resource_name in Resource_Data.resource_commonality_table:
+			return -1
+		return Resource_Data.resource_commonality_table.index(resource_name)
 	elif determinator == "sink":
-		pass
+		sink_yield = Items.get_item_by_name(resource_name).sink_yield
+		if sink_yield == None:
+			print(f"Item: {resource_name} has a sink yield of None")
+			sink_yield = 0
+		return sink_yield
 	else:
 		raise Exception(f"Determinator: {determinator} not recognized")
+
 
 def optimize_production_paths(sorted_production_paths, resource_rate_limitations, construction_limitations):
 	'''
