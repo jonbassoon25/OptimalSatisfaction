@@ -1,6 +1,5 @@
 from tkinter import *
 from tkinter import ttk
-import json
 
 import Items
 import Setup_Generator
@@ -346,8 +345,6 @@ class Production_Paths_Window:
 		mainframe.grid(column=0, row=0)
 
 		Label(mainframe, text="Production Paths:").grid(column=0, row=0, sticky="W")
-
-		
 		
 		#listbox of simple production paths
 		simple_production_paths_text = []
@@ -408,8 +405,10 @@ class Production_Path_Window:
 
 class Production_Path_Tree_Window:
 	def __init__(self, root, simple_production_path, production_path):
-		self.root = Toplevel(root)
+		self.root = Toplevel(root, width=600, height=600)
 		root = self.root
+
+		self.production_path = production_path
 
 		root.title(f"Production Tree for {simple_production_path['name']}")
 		root.resizable(False, False)
@@ -417,18 +416,65 @@ class Production_Path_Tree_Window:
 		mainframe = ttk.Frame(root, padding="10 10")
 		mainframe.grid(column=0, row=0)
 
-		Label(mainframe, text="Production Path").grid(column=0, row=0)
+		Label(mainframe, text="Production Path Tree").grid(column=0, row=0)
 
-		s = StringVar(value=Setup_Generator.get_production_recipes(production_path))
-		Listbox(mainframe, height=40, width=80, listvariable=s).grid(column=0, row=1)
+		#s = StringVar(value=Setup_Generator.get_production_recipes(production_path))
+		#Listbox(mainframe, height=40, width=80, listvariable=s).grid(column=0, row=1)
 
-		print(self.create_ppt_plan(production_path))
+		self.tree_canvas = Canvas(mainframe)
+		
+		self.draw_ppt()
+
+
+	def draw_ppt(self):
+		ppt_plan = self.get_ppt_plan()
+		ppt_rows = ppt_plan[0]
+		for row in ppt_rows:
+			print(row)
 	
-	def create_ppt_plan(self, production_branch): #production path tree plan
-		ppt_plan = list(production_branch.keys()) #only 1 key in a production branch
-		for sub_branch in list(production_branch.values())[0]: #only 1 value in a production branch
-			ppt_plan.append(self.create_ppt_plan(sub_branch))
-		return ppt_plan
+	
+	def get_ppt_plan(self, production_path = None, depth = 0):
+		'''
+		Returns this window's production path as a list of rows
+
+		Parameters:
+			production_path (dict): production path to convert
+			depth (int): depth of this function
+		
+		Returns:
+			(list): production path as a list of rows
+			(list): shape of the production path row list
+		'''
+		if production_path == None:
+			production_path = self.production_path
+
+		production_path_tree = []
+		dimensions = []
+		for i in range(depth):
+			production_path_tree.append([])
+			dimensions.append(0)
+
+		production_path_tree.append([list(value.keys())[0] for value in list(production_path.values())[0]]) 
+		dimensions.append(len(list(production_path.values())[0]))
+
+		if len(list(production_path.values())[0]) > 0: #has inputs / sublevels
+			input_paths = list(production_path.values())[0]
+			for input_path in input_paths:
+				#add path lengths of sub paths
+				sub_ppt_rows, sub_ppt_dims = self.get_ppt_plan(input_path, depth + 1)
+				
+				for i in range(len(sub_ppt_rows)):
+					if i == len(production_path_tree):
+						production_path_tree.append(sub_ppt_rows[i])
+						dimensions.append(sub_ppt_dims[i])
+					else:
+						production_path_tree[i] += sub_ppt_rows[i]
+						dimensions[i] += sub_ppt_dims[i]
+		
+		if depth == 0:
+			return [[list(production_path.keys())[0]]] + production_path_tree, [1] + dimensions #to account for inital recipe of the tree that isn't shown in any inputs
+		else:
+			return production_path_tree, dimensions
 
 
 Optimal_Satisfaction_UI().mainloop()
