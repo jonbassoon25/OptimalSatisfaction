@@ -377,9 +377,7 @@ def _get_sorted_production_paths(production_paths, ordered_weight_lambdas):
 		for i in range(len(sorted_production_paths) - 1, -1, -1):
 			if type(sorted_production_paths[i]) == list:
 				if len(ordered_weight_lambdas) > 1:
-					print("-")
 					new_sorted_paths = _get_sorted_production_paths(sorted_production_paths.pop(i), ordered_weight_lambdas[1:])
-					print("-")
 				else:
 					print("Warning: There are multiple paths of equal weight.")
 					new_sorted_paths = sorted_production_paths.pop(i)
@@ -400,7 +398,7 @@ def _get_resource_efficiency_weight(production_path, efficiency_determinator = "
 	weight = 0
 	for input in inputs.keys():
 		weight += _get_resource_weight(input, efficiency_determinator) * inputs[input]
-		print(f"weight of {inputs[input]} {input} is {_get_resource_weight(input, efficiency_determinator) * inputs[input]}")
+		#print(f"weight of {inputs[input]} {input} is {_get_resource_weight(input, efficiency_determinator) * inputs[input]}")
 	
 	return weight
 
