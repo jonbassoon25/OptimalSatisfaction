@@ -39,7 +39,8 @@ class Production_Machine:
 	construction_requirements = {}
 
 	def __init__(self, num_machines, clock_speed = 1.0, filled_somersloop_slots = 0):
-		self.clock_speed = clock_speed
+		self.num_machines = math.ceil(num_machines)
+		self.clock_speed = num_machines / self.num_machines
 		if self.total_somersloop_slots == 0:
 			self.production_amplification_multiplier = 1
 		else:
@@ -51,11 +52,11 @@ class Production_Machine:
 		#Correct power draw for somersloop production amplifier
 		self.maximum_power_draw = self.maximum_power_draw * round((1 + (filled_somersloop_slots / self.total_somersloop_slots)) ** 2, 3)
 
-		self.maximum_power_draw *= num_machines
+		self.maximum_power_draw *= self.num_machines
 
 		self.construction_requirements = self.construction_requirements.copy()
 		for resource in self.construction_requirements.keys():
-			self.construction_requirements[resource] *= math.ceil(num_machines)
+			self.construction_requirements[resource] *= self.num_machines
 
 
 

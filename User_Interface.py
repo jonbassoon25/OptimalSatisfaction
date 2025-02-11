@@ -421,17 +421,53 @@ class Production_Path_Tree_Window:
 		#s = StringVar(value=Setup_Generator.get_production_recipes(production_path))
 		#Listbox(mainframe, height=40, width=80, listvariable=s).grid(column=0, row=1)
 
-		self.tree_canvas = Canvas(mainframe)
-		
-		self.draw_ppt()
+		self.ppt_plan = self.get_ppt_plan()
 
+		self.recipe_box_width = 200
+		self.recipe_box_height = 75
+		self.recipe_box_padding = (75, 50)
+		self.text_height = 20
 
-	def draw_ppt(self):
-		ppt_plan = self.get_ppt_plan()
-		ppt_rows = ppt_plan[0]
-		for row in ppt_rows:
+		self.tree_canvas = Canvas(mainframe, background="#232323",
+								  width = self.recipe_box_padding[0]/2 + max(*self.ppt_plan[1]) * (self.recipe_box_width + self.recipe_box_padding[0]) - self.recipe_box_padding[0]/2, 
+								  height = self.recipe_box_padding[1]/2 + len(self.ppt_plan[1]) * (self.recipe_box_height + self.recipe_box_padding[1]) - self.recipe_box_padding[1]/2
+								)
+		self.tree_canvas.grid(column=0, row=1)
+
+		#debug print
+		for row in self.ppt_plan[0]:
 			print(row)
-	
+		
+		self._draw_ppt()
+
+
+	def _draw_ppt(self):
+		ppt_rows = self.ppt_plan[0]
+		ppt_dimensions = self.ppt_plan[1]
+
+		#Draw base structure
+		for i in range(len(ppt_dimensions)):
+			cur_row = ppt_rows[i]
+			for j in range(ppt_dimensions[i]):
+				pos = (
+					  self.recipe_box_padding[0]/2 + (self.recipe_box_width + self.recipe_box_padding[0]) * ((max(*self.ppt_plan[1]) - ppt_dimensions[i]) / 2 + j),
+					  self.recipe_box_padding[1]/2 + (self.recipe_box_height + self.recipe_box_padding[1]) * i
+					)
+				self.tree_canvas.create_rectangle(pos[0], pos[1], pos[0] + self.recipe_box_width, pos[1] + self.recipe_box_height, fill="#808080", outline="#CFECF7")
+				
+				cur_recipe = cur_row[j]
+
+				description = (
+					cur_recipe.__class__.__name__.replace("_", " ") + "\n" + "\n" +
+					cur_recipe.production_machine.__class__.__name__.replace("_", " ") + ": " + str(cur_recipe.production_machine.num_machines) + "\n" +
+					"at clock speed of " + str(round(cur_recipe.production_machine.clock_speed * 100, 3)) + "%"
+				)
+
+				self.tree_canvas.create_text(pos[0] + 5, pos[1] + 5, text=description, anchor="nw", font="monospace", fill="#000000")
+		
+		#Fill in connecting lines
+
+
 	
 	def get_ppt_plan(self, production_path = None, depth = 0):
 		'''
@@ -443,7 +479,7 @@ class Production_Path_Tree_Window:
 		
 		Returns:
 			(list): production path as a list of rows
-			(list): shape of the production path row list
+			(tuple): shape of the production path row list
 		'''
 		if production_path == None:
 			production_path = self.production_path
@@ -474,7 +510,7 @@ class Production_Path_Tree_Window:
 		if depth == 0:
 			return [[list(production_path.keys())[0]]] + production_path_tree, [1] + dimensions #to account for inital recipe of the tree that isn't shown in any inputs
 		else:
-			return production_path_tree, dimensions
+			return production_path_tree, tuple(dimensions)
 
 
 Optimal_Satisfaction_UI().mainloop()
