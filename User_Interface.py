@@ -466,7 +466,58 @@ class Production_Path_Tree_Window:
 				self.tree_canvas.create_text(pos[0] + 5, pos[1] + 5, text=description, anchor="nw", font="monospace", fill="#000000")
 		
 		#Fill in connecting lines
+		for i in range(len(ppt_dimensions) - 1): #for each row
+			cur_row = ppt_rows[i]
+			draw_index = 0
+			for j in range(ppt_dimensions[i]): #for each recipe in the row
+				#draw connecting lines to this recipe's input recipes
+				#input length can be found with the length of the recipe's input keys
+				pos = self._get_pos_at(i, j)
 
+				cur_recipe = cur_recipe = cur_row[j]
+				input_recipe_count = len(cur_recipe.inputs.keys())
+				line_start = (
+						pos[0] + self.recipe_box_width / 2,
+						pos[1] + self.recipe_box_height
+					)
+
+				if input_recipe_count == 0: #input resource
+					#draw input line
+					self.tree_canvas.create_line(
+						line_start[0], line_start[1],
+						line_start[0], line_start[1] + self.recipe_box_padding[1]/3,
+						fill="#CFECF7"
+					)
+				else:
+					#draw resource input line
+					self.tree_canvas.create_line(
+						line_start[0], line_start[1],
+						line_start[0], line_start[1] + self.recipe_box_padding[1]/2,
+						fill="#CFECF7"
+					)
+					for k in range(input_recipe_count):
+						#draw connecting bar
+						input_recipe_pos = self._get_pos_at(i + 1, k + draw_index)
+						bar_start_pos = (min(input_recipe_pos[0], pos[0]) + self.recipe_box_width/2, line_start[1] + self.recipe_box_padding[1]/2)
+						bar_end_pos = (max(self._get_pos_at(i + 1, input_recipe_count - 1 + draw_index)[0], pos[0]) + self.recipe_box_width/2, line_start[1] + self.recipe_box_padding[1]/2)
+
+						self.tree_canvas.create_line(*bar_start_pos, *bar_end_pos, fill="#CFECF7")
+
+						#draw connections to connecting bar
+						self.tree_canvas.create_line(
+							input_recipe_pos[0] + self.recipe_box_width/2, input_recipe_pos[1],
+							input_recipe_pos[0] + self.recipe_box_width/2, input_recipe_pos[1] - self.recipe_box_padding[1]/2,
+							fill="#CFECF7"
+						)
+
+					#incriment draw index
+					draw_index += input_recipe_count
+
+	def _get_pos_at(self, row, col):
+		return (
+				self.recipe_box_padding[0]/2 + (self.recipe_box_width + self.recipe_box_padding[0]) * ((max(*self.ppt_plan[1]) - self.ppt_plan[1][row]) / 2 + col),
+				self.recipe_box_padding[1]/2 + (self.recipe_box_height + self.recipe_box_padding[1]) * row
+			)
 
 	
 	def get_ppt_plan(self, production_path = None, depth = 0):
