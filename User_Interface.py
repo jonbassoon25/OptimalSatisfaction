@@ -418,6 +418,11 @@ class Production_Path_Tree_Window:
 
 		Label(mainframe, text="Production Path Tree").grid(column=0, row=0)
 
+		horizontal_scroll_bar = Scrollbar(root, orient=HORIZONTAL)
+		vertical_scroll_bar = Scrollbar(root, orient=VERTICAL)
+		horizontal_scroll_bar.grid(column=0, row=1, sticky="EW")
+		vertical_scroll_bar.grid(column=1, row=0, sticky="NS")
+
 		#s = StringVar(value=Setup_Generator.get_production_recipes(production_path))
 		#Listbox(mainframe, height=40, width=80, listvariable=s).grid(column=0, row=1)
 
@@ -429,11 +434,20 @@ class Production_Path_Tree_Window:
 		self.text_height = 20
 		self.connector_seperation = 10
 
-		self.tree_canvas = Canvas(mainframe, background="#232323",
-								  width = self.recipe_box_padding[0]/2 + max(*self.ppt_plan[1]) * (self.recipe_box_width + self.recipe_box_padding[0]) - self.recipe_box_padding[0]/2, 
-								  height = self.recipe_box_padding[1]/2 + (len(self.ppt_plan[1]) - 1) * (self.recipe_box_height + self.recipe_box_padding[1] + (sum(self.ppt_plan[1]) - len(self.ppt_plan[1])) * self.connector_seperation)
-								)
+		c_width = max(*self.ppt_plan[1]) * (self.recipe_box_width + self.recipe_box_padding[0])
+		c_height = self.recipe_box_padding[1]/2 + (len(self.ppt_plan[1]) - 1) * (self.recipe_box_height + self.recipe_box_padding[1] + (sum(self.ppt_plan[1]) - len(self.ppt_plan[1])) * self.connector_seperation)
+		self.tree_canvas = Canvas(mainframe, background="#232323", yscrollcommand=vertical_scroll_bar.set, xscrollcommand=horizontal_scroll_bar.set, 
+							scrollregion = (
+								    0, 0, 
+								    c_width,
+								    c_height
+								  ),
+							width = min(1920/2, c_width), height = min(1080/2, c_height)
+							)
 		self.tree_canvas.grid(column=0, row=1)
+
+		horizontal_scroll_bar['command'] = self.tree_canvas.xview
+		vertical_scroll_bar['command'] = self.tree_canvas.yview
 
 		#debug print
 		#for row in self.ppt_plan[0]:
