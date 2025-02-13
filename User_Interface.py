@@ -405,7 +405,7 @@ class Production_Path_Window:
 
 class Production_Path_Tree_Window:
 	def __init__(self, root, simple_production_path, production_path):
-		self.root = Toplevel(root, width=600, height=600)
+		self.root = Toplevel(root)
 		root = self.root
 
 		self.production_path = production_path
@@ -427,10 +427,11 @@ class Production_Path_Tree_Window:
 		self.recipe_box_height = 75
 		self.recipe_box_padding = (75, 50)
 		self.text_height = 20
+		self.connector_seperation = 10
 
 		self.tree_canvas = Canvas(mainframe, background="#232323",
 								  width = self.recipe_box_padding[0]/2 + max(*self.ppt_plan[1]) * (self.recipe_box_width + self.recipe_box_padding[0]) - self.recipe_box_padding[0]/2, 
-								  height = self.recipe_box_padding[1]/2 + len(self.ppt_plan[1]) * (self.recipe_box_height + self.recipe_box_padding[1]) - self.recipe_box_padding[1]/2
+								  height = self.recipe_box_padding[1]/2 + (len(self.ppt_plan[1]) - 1) * (self.recipe_box_height + self.recipe_box_padding[1] + (sum(self.ppt_plan[1]) - len(self.ppt_plan[1])) * self.connector_seperation)
 								)
 		self.tree_canvas.grid(column=0, row=1)
 
@@ -445,36 +446,29 @@ class Production_Path_Tree_Window:
 		ppt_rows = self.ppt_plan[0]
 		ppt_dimensions = self.ppt_plan[1]
 
-		#Draw base structure
-		for i in range(len(ppt_dimensions)):
+		for i in range(len(ppt_dimensions) - 1): #for each row
 			cur_row = ppt_rows[i]
-			for j in range(ppt_dimensions[i]):
-				pos = (
-					  self.recipe_box_padding[0]/2 + (self.recipe_box_width + self.recipe_box_padding[0]) * ((max(*self.ppt_plan[1]) - ppt_dimensions[i]) / 2 + j),
-					  self.recipe_box_padding[1]/2 + (self.recipe_box_height + self.recipe_box_padding[1]) * i
-					)
-				self.tree_canvas.create_rectangle(pos[0], pos[1], pos[0] + self.recipe_box_width, pos[1] + self.recipe_box_height, fill="#808080", outline="#CFECF7")
+			draw_index = 0
+			row_v_offset = (sum(self.ppt_plan[1][:i]) - i - 1) * self.connector_seperation
+			next_row_v_offset = (sum(self.ppt_plan[1][:i + 1]) - i - 1) * self.connector_seperation
+			for j in range(ppt_dimensions[i]): #for each recipe in the row
+				#input length can be found with the length of the recipe's input keys
+				pos = self._get_pos_at(i, j)
+				cur_recipe = cur_recipe = cur_row[j]
 				
-				cur_recipe = cur_row[j]
 
+				#Draw base structure
+				self.tree_canvas.create_rectangle(pos[0], pos[1] + row_v_offset, pos[0] + self.recipe_box_width, pos[1] + row_v_offset + self.recipe_box_height, fill="#808080", outline="#CFECF7")
 				description = (
 					cur_recipe.__class__.__name__.replace("_", " ") + "\n" + "\n" +
 					cur_recipe.production_machine.__class__.__name__.replace("_", " ") + ": " + str(cur_recipe.production_machine.num_machines) + "\n" +
 					"at clock speed of " + str(round(cur_recipe.production_machine.clock_speed * 100, 3)) + "%"
 				)
 
-				self.tree_canvas.create_text(pos[0] + 5, pos[1] + 5, text=description, anchor="nw", font="monospace", fill="#000000")
-		
-		#Fill in connecting lines
-		for i in range(len(ppt_dimensions) - 1): #for each row
-			cur_row = ppt_rows[i]
-			draw_index = 0
-			for j in range(ppt_dimensions[i]): #for each recipe in the row
-				#draw connecting lines to this recipe's input recipes
-				#input length can be found with the length of the recipe's input keys
-				pos = self._get_pos_at(i, j)
+				self.tree_canvas.create_text(pos[0] + 5, pos[1] + row_v_offset + 5, text=description, anchor="nw", font="monospace", fill="#000000")
 
-				cur_recipe = cur_recipe = cur_row[j]
+				#draw connecting lines to this recipe's input recipes
+				cur_v_offset = (sum(self.ppt_plan[1][:i + 1]) - j - i - 1) * self.connector_seperation
 				input_recipe_count = len(cur_recipe.inputs.keys())
 				line_start = (
 						pos[0] + self.recipe_box_width / 2,
@@ -493,22 +487,22 @@ class Production_Path_Tree_Window:
 				else:
 					#draw resource input line
 					self.tree_canvas.create_line(
-						line_start[0], line_start[1],
-						line_start[0], line_start[1] + self.recipe_box_padding[1]/2,
+						line_start[0], line_start[1] + row_v_offset,
+						line_start[0], line_start[1] + self.recipe_box_padding[1]/2 + cur_v_offset,
 						fill="#CFECF7"
 					)
 					for k in range(input_recipe_count):
 						#draw connecting bar
 						input_recipe_pos = self._get_pos_at(i + 1, k + draw_index)
-						bar_start_pos = (min(input_recipe_pos[0], pos[0]) + self.recipe_box_width/2, line_start[1] + self.recipe_box_padding[1]/2)
-						bar_end_pos = (max(self._get_pos_at(i + 1, input_recipe_count - 1 + draw_index)[0], pos[0]) + self.recipe_box_width/2, line_start[1] + self.recipe_box_padding[1]/2)
+						bar_start_pos = (min(input_recipe_pos[0], pos[0]) + self.recipe_box_width/2, line_start[1] + cur_v_offset + self.recipe_box_padding[1]/2)
+						bar_end_pos = (max(self._get_pos_at(i + 1, input_recipe_count - 1 + draw_index)[0], pos[0]) + self.recipe_box_width/2, line_start[1] + cur_v_offset + self.recipe_box_padding[1]/2)
 
 						self.tree_canvas.create_line(*bar_start_pos, *bar_end_pos, fill="#CFECF7")
 
 						#draw connections to connecting bar
 						self.tree_canvas.create_line(
-							input_recipe_pos[0] + self.recipe_box_width/2, input_recipe_pos[1],
-							input_recipe_pos[0] + self.recipe_box_width/2, input_recipe_pos[1] - self.recipe_box_padding[1]/2,
+							input_recipe_pos[0] + self.recipe_box_width/2, input_recipe_pos[1] + next_row_v_offset, #at the box and to the bar
+							input_recipe_pos[0] + self.recipe_box_width/2, input_recipe_pos[1] + cur_v_offset  - self.recipe_box_padding[1]/2,
 							fill="#CFECF7"
 						)
 
