@@ -483,11 +483,13 @@ class Production_Path_Tree_Window:
 
 				if input_recipe_count == 0: #input resource
 					#draw input line
+					'''
 					self.tree_canvas.create_line(
 						line_start[0], line_start[1],
 						line_start[0], line_start[1] + self.recipe_box_padding[1]/3,
 						fill="#CFECF7"
 					)
+					'''
 				else:
 					#draw resource input line
 					self.tree_canvas.create_line(
@@ -563,5 +565,5 @@ class Production_Path_Tree_Window:
 		else:
 			return production_path_tree, tuple(dimensions)
 
-
-Optimal_Satisfaction_UI().mainloop()
+if __name__ == "__main__":
+	Optimal_Satisfaction_UI().mainloop()
