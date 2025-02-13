@@ -1,4 +1,7 @@
 import itertools
+import multiprocessing as mp
+import multiprocessing.sharedctypes as mp_shared_ctypes
+import ctypes
 
 from PDL import *
 
@@ -188,7 +191,121 @@ def get_construction_requirements(production_branch):
 	return construction_requirements
 
 
-def filter_production_paths(production_paths, output_item, production_rate):
+def _calc_should_del(queue, production_path_ids, production_path_data_by_id, should_del, output_item, production_rate):
+	while True:
+		#Set constants for the loop
+		#print("awaiting queued i-group")
+		i_group = queue.get()
+		#print("recieved queued i-group")
+		if i_group == None:
+			queue.put(None)
+			break
+
+		lp = len(production_path_ids)
+		print(f"starting group {i_group[0]}-{i_group[-1]}/{lp}")
+
+		indicies_to_flip = set()
+
+		for i in i_group:
+			production_path_data = production_path_data_by_id[production_path_ids[i]]
+
+			branch_max_energy_use = production_path_data["max energy"]
+			branch_requirements = production_path_data["construction requirements"]
+			
+			branch_inputs = production_path_data["inputs"]
+			branch_outputs = production_path_data["outputs"]
+
+			branch_input_keys_length = len(branch_inputs.keys())
+			branch_output_keys_length = len(branch_inputs.keys())
+
+			#Check for expected output amount
+			if not output_item.name in branch_outputs.keys(): #Shouldn't need, but do if recipes were misinputted
+				raise Exception(f"Output not in output items: {output_item.name}")
+			if branch_outputs[output_item.name] != production_rate:
+				indicies_to_flip.add(i)
+				continue
+
+			#Check for unnecessary intermediary steps
+
+			# A path with unnecessary steps is considered such if it has:
+			#  the same input/output quantities as another path 
+			#  and 
+			#  has a higher electrical consumption than the other path
+			#  and
+			#  more of each type of construction resource as the other path
+
+			#Check if this path has the same inputs and outputs as any other paths and a higher electrical consumption
+			#Then for each path that it does, check to see if this path has the same or more of each construction resouce of the path thereof
+			for j in range(lp):
+				#Don't check the path against itself or ones that have been removed
+				if j == i:
+					continue
+
+				check_data = production_path_data_by_id[production_path_ids[j]]
+
+				#Check input and output resources
+				check_inputs = check_data["inputs"]
+				check_outputs = check_data["outputs"]
+
+
+				if len(check_inputs.keys()) != branch_input_keys_length:
+					continue #Input resources cannot be the same if they are of differing lengths
+				if len(check_outputs.keys()) != branch_output_keys_length:
+					continue #Output resources cannot be the same if they are of differing lengths
+
+
+				#Check electrical consumption of this path to every other path
+				if branch_max_energy_use <= check_data["max energy"]:
+					continue #this check isn't true, so check is always false regardless of the others
+
+
+				#Check input resource types
+				broken = False
+				for resource in branch_inputs.keys():
+					if not resource in check_inputs.keys():
+						broken = True
+						break
+					if branch_inputs[resource] != check_inputs[resource]:
+						broken = True
+						break
+				if broken:
+					continue #Loop was broken so the input resources of the paths are not the same
+
+
+				#Check input resource types
+				broken = False
+				for resource in branch_outputs.keys():
+					if not resource in check_outputs.keys():
+						broken = True
+						break
+					if branch_outputs[resource] != check_outputs[resource]:
+						broken = True
+						break
+				if broken:
+					continue #Loop was broken so the output resources of the paths are not the same
+
+
+				#Check construction resources of this path to every other path
+				#Null hypothesis = this branch contains less or an equal amount of each construction resource than any other path
+				#Alternate hypotheses = this branch contains more of each construction resource than any other path
+				check_requirements = check_data["construction requirements"]
+				for requirement in check_requirements.keys():
+					if not requirement in branch_requirements.keys():
+						continue #if the resource in the check branch isn't required for this one
+						
+					if check_requirements[requirement] >= branch_requirements[requirement]:
+						continue #if the resource in the check branch is more than or equal to the quantity this recipe needs
+						
+					#The null hypothesis was never proven so the alternate hypothesis is true and this branch should be removed
+					indicies_to_flip.add(i)
+					break #second part of the check is true, so this production branch can be removed
+		
+		#flip indicies in should_del
+		for index in indicies_to_flip:
+			should_del[index] = True
+		
+
+def filter_production_paths(production_paths, output_item, production_rate, num_helpers = mp.cpu_count(), group_size = 500):
 	'''
 	Filters a production paths list to only include paths that:
 	  -  Output the expected amount
@@ -202,110 +319,66 @@ def filter_production_paths(production_paths, output_item, production_rate):
 	'''
 	if type(output_item) == type(""):
 		output_item = Items.get_item_by_name(output_item)
-	del_indicies = set()
 
 	lp = len(production_paths)
 	memoized.memory_size = lp
-	for i in range(lp):
-		if i % 50 == 0:
-			print(f"{i}/{lp}")
-		#Set constants for the loop
-		production_branch = production_paths[i]
-		branch_max_energy_use = get_max_energy_use(production_branch)
-		branch_requirements = get_construction_requirements(production_branch)
 
-		branch_inputs = get_inputs(production_branch)
-		branch_outputs = get_outputs(production_branch)
+	#set shared types for multiprocessing
+	should_del = mp_shared_ctypes.Array(ctypes.c_bool, lp)
 
-		branch_input_keys_length = len(branch_inputs.keys())
-		branch_output_keys_length = len(branch_inputs.keys())
+	#precompile inputs, outputs, energy, and construction requirment values
+	print("Generating Data...")
+	production_path_ids = []
+	production_path_data_by_id = {}
+	for production_path in production_paths:
+		production_path_ids.append(id(production_path))
+		production_path_data_by_id[id(production_path)] = {
+			"inputs": get_inputs(production_path),
+			"outputs": get_outputs(production_path),
+			"max energy": get_max_energy_use(production_path),
+			"construction requirements": get_construction_requirements(production_path)
+		}
+	
 
-		#Check for expected output amount
-		if not output_item.name in branch_outputs.keys(): #Shouldn't need, but do if recipes were misinputed
-			raise Exception(f"Output not in output items: {output_item.name}")
-		if branch_outputs[output_item.name] != production_rate:
-			del_indicies.add(i)
-			continue
+	#use sketchy version of shared types for providing production path
+	#production_paths_id = id(production_paths)
 
-		#Check for unnecessary intermediary steps
+	#initialize queue
+	queue = mp.Queue()
+	for i in range(0, len(production_paths), group_size):
+		queue.put(tuple(range(i, min(len(production_paths), i + group_size))))
+	
+	queue.put(None)
 
-		# A path with unnecessary steps is considered such if it has:
-		#  the same input/output quantities as another path 
-		#  and 
-		#  has a higher electrical consumption than the other path
-		#  and
-		#  more of each type of construction resource as the other path
+	#'''
+	#generate processes
+	print(num_helpers)
+	processes = []
+	for i in range(num_helpers):
+		processes.append(mp.Process(target=_calc_should_del, args=(queue, production_path_ids, production_path_data_by_id, should_del, output_item, production_rate)))
 
-		#Check if this path has the same inputs and outputs as any other paths and a higher electrical consumption
-		#Then for each path that it does, check to see if this path has the same or more of each construction resouce of the path thereof
-		for j in range(lp):
-			#Don't check the path against itself or ones that have been removed
-			if j == i or j in del_indicies:
-				continue
+	#start processes
+	print(f"Starting Computation with {len(processes)} Processes...")
+	for process in processes:
+		process.start()
 
-			check_branch = production_paths[j]
+	#join processes
+	for process in processes:
+		process.join()
 
-			#Check input and output resources
-			check_inputs = get_inputs(check_branch)
-			check_outputs = get_outputs(check_branch)
+	#'''
+	
+	if len(processes) == 0:
+		_calc_should_del(queue, production_path_ids, production_path_data_by_id, should_del, output_item, production_rate)
 
+	del_count = 0
 
-			if len(check_inputs.keys()) != branch_input_keys_length:
-				continue #Input resources cannot be the same if they are of differing lengths
-			if len(check_outputs.keys()) != branch_output_keys_length:
-				continue #Output resources cannot be the same if they are of differing lengths
+	for i in range(len(should_del) - 1, -1, -1):
+		if should_del[i]:
+			del_count += 1
+			del production_paths[i]
 
-
-			#Check electrical consumption of this path to every other path
-			if branch_max_energy_use <= get_max_energy_use(production_paths[j]):
-				continue #this check isn't true, so check is always false regardless of the others
-
-
-			#Check input resource types
-			broken = False
-			for resource in branch_inputs.keys():
-				if not resource in check_inputs.keys():
-					broken = True
-					break
-				if branch_inputs[resource] != check_inputs[resource]:
-					broken = True
-					break
-			if broken:
-				continue #Loop was broken so the input resources of the paths are not the same
-
-
-			#Check input resource types
-			broken = False
-			for resource in branch_outputs.keys():
-				if not resource in check_outputs.keys():
-					broken = True
-					break
-				if branch_outputs[resource] != check_outputs[resource]:
-					broken = True
-					break
-			if broken:
-				continue #Loop was broken so the output resources of the paths are not the same
-
-
-			#Check construction resources of this path to every other path
-			#Null hypothesis = this branch contains less or an equal amount of each construction resource than any other path
-			#Alternate hypotheses = this branch contains more of each construction resource than any other path
-			check_requirements = get_construction_requirements(production_paths[j])
-			for requirement in check_requirements.keys():
-				if not requirement in branch_requirements.keys():
-					continue #if the resource in the check branch isn't required for this one
-				
-
-				if check_requirements[requirement] >= branch_requirements[requirement]:
-					continue #if the resource in the check branch is more than or equal to the quantity this recipe needs
-				
-				#The null hypothesis was never proven so the alternate hypothesis is true and this branch should be removed
-				del_indicies.add(i)
-				break #second part of the check is true, so this production branch can be removed
-
-	#Remove del indices
-	for index in reversed(sorted(list(del_indicies))):
-		del production_paths[index]
+	print(del_count)
 	
 	memoized.memory_size = 50
 
@@ -379,7 +452,7 @@ def _get_sorted_production_paths(production_paths, ordered_weight_lambdas):
 				if len(ordered_weight_lambdas) > 1:
 					new_sorted_paths = _get_sorted_production_paths(sorted_production_paths.pop(i), ordered_weight_lambdas[1:])
 				else:
-					print("Warning: There are multiple paths of equal weight.")
+					#print("Warning: There are multiple paths of equal weight.")
 					new_sorted_paths = sorted_production_paths.pop(i)
 
 				#Add paths to full storted production path list
@@ -457,7 +530,7 @@ def _get_resource_weight(resource_name, determinator):
 	elif determinator == "sink":
 		sink_yield = Items.get_item_by_name(resource_name).sink_yield
 		if sink_yield == None:
-			print(f"Item: {resource_name} has a sink yield of None")
+			#print(f"Item: {resource_name} has a sink yield of None")
 			sink_yield = 0
 		return sink_yield
 	else:

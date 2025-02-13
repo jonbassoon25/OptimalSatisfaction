@@ -435,8 +435,8 @@ class Production_Path_Tree_Window:
 		self.tree_canvas.grid(column=0, row=1)
 
 		#debug print
-		for row in self.ppt_plan[0]:
-			print(row)
+		#for row in self.ppt_plan[0]:
+		#	print(row)
 		
 		self._draw_ppt()
 
