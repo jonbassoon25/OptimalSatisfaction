@@ -167,3 +167,4 @@ text.txt
 # Custom
 Resource_Data_Files/data.pkl
 Resource_Data_Files/*.txt
+Unused_Code/*

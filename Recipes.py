@@ -27,6 +27,7 @@ class Recipe:
 class User_Provided_Resource(Recipe):
 	inputs = {}
 	outputs = {}
+	production_machine = PMs.Player(1)
 
 	def __init__(self, outputs):
 		self.outputs = outputs

@@ -1,6 +1,7 @@
 from tkinter import *
 from tkinter import ttk
 
+import Util
 import Items
 import Setup_Generator
 
@@ -56,13 +57,13 @@ class Optimal_Satisfaction_UI:
 		input_resource_display = Display_Box(mainframe, root, text="Input Resources", content=self.input_resources)
 		input_resource_display.grid(column=3, row=1, columnspan=2, padx=5, sticky="NW")
 
-		self.resource_limits = [["SAM", 0]]
-		resource_limit_display = Display_Box(mainframe, root, text="Resource Limits", content=self.resource_limits, allow_zero=True)
-		resource_limit_display.grid(column=5, row=1, padx=5, columnspan=2, sticky="NW")
+		#self.resource_limits = [["SAM", 0]]
+		#resource_limit_display = Display_Box(mainframe, root, text="Resource Limits", content=self.resource_limits, allow_zero=True)
+		#resource_limit_display.grid(column=5, row=1, padx=5, columnspan=2, sticky="NW")
 
-		self.construction_limits = []
-		construction_limit_display = Display_Box(mainframe, root, text="Construction Limits", content=self.construction_limits, allow_zero=True)
-		construction_limit_display.grid(column=7, row=1, columnspan=2, padx=5, sticky="NW")
+		#self.construction_limits = []
+		#construction_limit_display = Display_Box(mainframe, root, text="Construction Limits", content=self.construction_limits, allow_zero=True)
+		#construction_limit_display.grid(column=7, row=1, columnspan=2, padx=5, sticky="NW")
 
 		
 		calculate = Button(mainframe, text="Calculate Paths", command=lambda:Production_Paths_Window(self, root, self._generate_production_tree()))
@@ -84,7 +85,7 @@ class Optimal_Satisfaction_UI:
 			miner_tier = 3
 		else:
 			raise Exception(f"Unrecognized miner tier from self.miner_tier: {self.miner_tier.get}")
-		return Setup_Generator.generate_production_tree(self.output_str.get(), int(self.production_rate_str.get()), miner_tier, default_only=self.recipe_type.get() == "default")
+		return Setup_Generator.generate_production_tree(self.output_str.get(), int(self.production_rate_str.get()), miner_tier, default_only=self.recipe_type.get() == "default", input_resources=Util.display_box_content_to_dict(self.input_resources))
 	
 
 	def mainloop(self):
@@ -253,68 +254,6 @@ class Display_Box(Frame):
 		self.set_content(self.content)
 
 
-class Drag_Sort(Canvas):
-	def __init__(self, master, options, x_scale = 1, y_scale = 1, orient = VERTICAL):
-		width = x_scale * 100
-		height = y_scale * 20
-
-		if orient == VERTICAL:
-			height *= len(options)
-		elif orient == HORIZONTAL:
-			width *= len(options)
-		else:
-			raise Exception(f"Orient not recognized: {orient.__name__}")
-
-		super().__init__(master, width=width, height=height)
-		self.orient = orient
-
-		self.selected_item = None
-		self.dy = 0
-		
-
-		self.bind("<Enter>", lambda event: self.enter_canvas(event))
-		self.bind("<Leave>", lambda event: self.exit_canvas(event))
-		
-		self.bind("<Button>", self.on_canvas_pressed)
-		self.bind("<ButtonRelease>", self.on_canvas_released)
-
-		items = [Label(self, text=item_name) for item_name in options]
-		self.dragable_block_ids = []
-		
-		
-		for i in range(len(items)):
-			item = items[i]
-
-			if orient == VERTICAL:
-				id = self.create_window(width/2, (i + 0.5) * height/len(options), width=width, height=height/len(options), window=item, tags=("dragable_block"))
-			else:
-				id = self.create_window((i + 0.5) * width/len(options), height/2, width=width/len(options), height=height, window=item, tags=("dragable_block"))
-
-			self.dragable_block_ids.append(id)
-			
-
-	def on_canvas_pressed(self, event):
-		print("canvas was pressed")
-		#self.selected_item = item
-		self.dy = event.y #- item.y
-	
-	def on_canvas_released(self, event):
-		print("canvas was released")
-
-	def enter_canvas(self, event):
-		print("entered canvas area")
-		if self.selected_item == None:
-			return
-		target_y = event.y - self.dy
-		cur_y = 0
-
-	def exit_canvas(self, event):
-		print("exited canvas area")
-		if self.selected_item == None:
-			return
-		self.selected_item = None
-
-
 class Production_Paths_Window:
 	def __init__(self, main_window, root, production_tree):
 		if production_tree == None:
@@ -473,8 +412,13 @@ class Production_Path_Tree_Window:
 
 				#Draw base structure
 				self.tree_canvas.create_rectangle(pos[0], pos[1] + row_v_offset, pos[0] + self.recipe_box_width, pos[1] + row_v_offset + self.recipe_box_height, fill="#808080", outline="#CFECF7")
+				
+				recipe_name = cur_recipe.__class__.__name__.replace("_", " ")
+				if recipe_name == "User Provided Resource":
+					recipe_name = list(cur_recipe.outputs.keys())[0]
+
 				description = (
-					cur_recipe.__class__.__name__.replace("_", " ") + "\n" + "\n" +
+					recipe_name + "\n" + "\n" +
 					cur_recipe.production_machine.__class__.__name__.replace("_", " ") + ": " + str(cur_recipe.production_machine.num_machines) + "\n" +
 					"at clock speed of " + str(round(cur_recipe.production_machine.clock_speed * 100, 3)) + "%"
 				)

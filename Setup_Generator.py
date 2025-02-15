@@ -3,15 +3,11 @@ import multiprocessing as mp
 import multiprocessing.sharedctypes as mp_shared_ctypes
 import ctypes
 
-from PDL import *
-
 import Util
 import Production_Machines
 import Recipes
 import Items
 from Resource_Data import Resource_Data
-
-import Production_Tree_Dataclasses
 
 
 def generate_production_tree(output_item, production_rate, miner_level, default_only = True, input_resources = {}, blacklist_recipes = set()):
@@ -91,6 +87,7 @@ def generate_production_tree(output_item, production_rate, miner_level, default_
 
 	return production_tree
 
+
 def split_production_tree(production_tree):
 	'''
 	Splits a production tree into a list of production paths
@@ -106,6 +103,7 @@ def split_production_tree(production_tree):
 			production_paths.append({key: list(tup)})
 	return production_paths
 
+
 def get_simple_production_paths(production_paths):
 	simple_production_paths = []
 	for production_branch in production_paths:
@@ -116,6 +114,7 @@ def get_simple_production_paths(production_paths):
 			})
 	return simple_production_paths
 
+
 def get_production_recipes(production_branch):
 	production_recipes = []
 	for key in production_branch:
@@ -125,7 +124,6 @@ def get_production_recipes(production_branch):
 	return production_recipes
 
 
-@memoized
 def get_inputs(production_branch):
 	production_recipes = get_production_recipes(production_branch)
 	inputs = {}
@@ -139,7 +137,6 @@ def get_inputs(production_branch):
 	return inputs
 
 
-@memoized
 def get_outputs(production_branch):
 	production_recipes = get_production_recipes(production_branch)
 	inputs = {}
@@ -169,7 +166,6 @@ def get_outputs(production_branch):
 	return outputs
 
 
-@memoized
 def get_max_energy_use(production_branch):
 	production_recipes = get_production_recipes(production_branch)
 	meu = 0 #max energy use
@@ -178,7 +174,6 @@ def get_max_energy_use(production_branch):
 	return meu
 
 
-@memoized
 def get_construction_requirements(production_branch):
 	production_recieps = get_production_recipes(production_branch)
 	construction_requirements = {}
@@ -321,7 +316,6 @@ def filter_production_paths(production_paths, output_item, production_rate, num_
 		output_item = Items.get_item_by_name(output_item)
 
 	lp = len(production_paths)
-	memoized.memory_size = lp
 
 	#set shared types for multiprocessing
 	should_del = mp_shared_ctypes.Array(ctypes.c_bool, lp)
@@ -377,10 +371,6 @@ def filter_production_paths(production_paths, output_item, production_rate, num_
 		if should_del[i]:
 			del_count += 1
 			del production_paths[i]
-
-	print(del_count)
-	
-	memoized.memory_size = 50
 
 	return production_paths
 
@@ -537,47 +527,11 @@ def _get_resource_weight(resource_name, determinator):
 		raise Exception(f"Determinator: {determinator} not recognized")
 
 
-def optimize_production_paths(sorted_production_paths, resource_rate_limitations, construction_limitations):
-	'''
-	Optimizes production paths to meet resource and construction limitations
-
-	Parameters:
-		sorted_production_paths (list): list of sorted production paths
-		resource_rate_limitations (dict): dictionary of resource rate limitations (format: {"resource": quantity/min})
-		construction_limitations (dict): dictionary of construction limitations (format: {"resource": quantity})
-	
-	Returns:
-		(list): sorted list of optimized production paths
-	'''
-
-
-def generate_setup(output_item_name, production_rate, miner_level, input_resources = {},	
-				   order_of_importance = ["maximize resource efficiency", "use input resources", "minimize byproducts", "minimize construction cost", "minimize energy consumption"], 
-				   resource_rate_limitations = {"SAM": 0}, 
-				   construction_limitations = {"Power Shard": 0, "Somersloop": 0}
-		):
-	'''
-	Generates the production setup that meets the given requirements
-	'''
-	output_item = Items.get_item_by_name(output_item_name)
-
-	#construct all production trees using only default recipes
-	default_production_tree = generate_production_tree(output_item, production_rate, miner_level, True, input_resources)
-
-	#construct all production trees using default and alternate recipes
-	#complete_production_tree = generate_production_tree(output_item, production_rate, 2, False, input_resources)
-	complete_production_tree = {}
-
-	#When deciding which branch of a production tree to use, use the best recipe until it is not possible then the second best, and so on unil no recipes are possible or the resource requirement is fufilled
-
 if __name__ == "__main__":
-	item_name = "Rotor"
+	item_name = "Plastic"
 	quantity = 10 #per min
 
 	gpt = generate_production_tree(Items.get_item_by_name(item_name), quantity, 2, False)
-
-	production_tree = Production_Tree_Dataclasses.production_tree(gpt)
-	simple_paths = production_tree.get_simple_paths()
 	spt = split_production_tree(gpt)
 
 	for production_branch in spt:

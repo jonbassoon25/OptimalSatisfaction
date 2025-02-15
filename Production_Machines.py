@@ -32,6 +32,7 @@ class Resource_Well:
 class Production_Machine:
 	clock_speed = 1.0
 	production_amplification_multiplier = 1.0
+	num_machines = 0
 
 	maximum_power_draw = 0
 	total_somersloop_slots = 1
@@ -59,6 +60,8 @@ class Production_Machine:
 			self.construction_requirements[resource] *= self.num_machines
 
 
+class Player(Production_Machine):
+	num_machines = 1
 
 
 class Resource_Miner(Production_Machine):

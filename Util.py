@@ -1,10 +1,13 @@
 def copy_flat_dict(dict):
+	'''Returns a new dictionary with copied keys'''
 	new_dict = {}
 	for key in dict.keys():
 		new_dict[key] = dict[key]
 	return new_dict
 
+
 def print_production_tree(production_tree, current_print_str = [], current_columns = set(), depth = 0):
+	'''Prints a production tree to the console (non-functional)'''
 	if depth == 0:
 		current_print_str.append("Production Tree:")
 		depth += 1
@@ -37,3 +40,10 @@ def print_production_tree(production_tree, current_print_str = [], current_colum
 	
 	if depth == 1: #First call
 		print("\n".join(current_print_str))
+
+
+def display_box_content_to_dict(content):
+	output = {}
+	for arr in content:
+		output[arr[0]] = arr[1]
+	return output
