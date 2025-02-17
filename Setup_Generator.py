@@ -91,6 +91,12 @@ def generate_production_tree(output_item, production_rate, miner_level, default_
 def split_production_tree(production_tree):
 	'''
 	Splits a production tree into a list of production paths
+
+	Parameters:
+		production_tree (dict): production tree to split
+
+	Returns:
+		(list): all possible production paths contained in the tree
 	'''
 	production_paths = []
 	for key in production_tree.keys(): #Each recipe
@@ -104,7 +110,7 @@ def split_production_tree(production_tree):
 	return production_paths
 
 
-def get_simple_production_paths(production_paths):
+def get_simple_production_paths(production_paths):	
 	'''
 	Creates a list of simple production paths from a production paths list
 	
