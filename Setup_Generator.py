@@ -335,7 +335,7 @@ def _calc_should_del(queue, production_path_ids, production_path_data_by_id, sho
 				if broken:
 					continue #Loop was broken so the input resources of the paths are not the same
 
-				#Check input resource types
+				#Check output resource types
 				broken = False
 				for resource in branch_outputs.keys():
 					if not resource in check_outputs.keys():
@@ -348,8 +348,6 @@ def _calc_should_del(queue, production_path_ids, production_path_data_by_id, sho
 					continue #Loop was broken so the output resources of the paths are not the same
 
 				#Check construction resources of this path to every other path
-				#Null hypothesis = this branch contains less or an equal amount of each construction resource than any other path
-				#Alternate hypotheses = this branch contains more of each construction resource than any other path
 				check_requirements = check_data["construction requirements"]
 				for requirement in check_requirements.keys():
 					if not requirement in branch_requirements.keys():
@@ -358,11 +356,10 @@ def _calc_should_del(queue, production_path_ids, production_path_data_by_id, sho
 					if check_requirements[requirement] >= branch_requirements[requirement]:
 						continue #if the resource in the check branch is more than or equal to the quantity this recipe needs
 						
-					#The null hypothesis was never proven so the alternate hypothesis is true and this branch should be removed
 					indicies_to_flip.add(i)
-					break #second part of the check is true, so this production branch can be removed
+					break #the check is true, so this production branch can be removed
 		
-		#flip indicies in should_del
+		#flip indicies in the linked should_del multiprocessing array
 		for index in indicies_to_flip:
 			should_del[index] = True
 		
