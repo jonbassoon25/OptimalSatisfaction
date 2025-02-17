@@ -49,10 +49,12 @@ class Resource_Data:
 		rct = [] #resource commonality table
 		resource_ratio_key_list = list(resource_ratios.keys())
 		for i in range(len(resource_ratio_key_list)):
-			key_of_smallest = resource_ratio_key_list[i]
+			key_of_smallest = None
 			for j in range(len(resource_ratio_key_list)):
 				if resource_ratio_key_list[j] in rct:
 					continue
+				if key_of_smallest == None:
+					key_of_smallest = resource_ratio_key_list[j]
 				cur_val = resource_ratios[resource_ratio_key_list[j]]
 				if cur_val < resource_ratios[key_of_smallest]:
 					key_of_smallest = resource_ratio_key_list[j]
