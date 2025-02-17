@@ -114,8 +114,8 @@ class Item_Selection_Window:
 		Generates a window for item selection with a parent window and linked display box
 		
 		Parameters:
-			(tkinter_window) root: master window of this window
-			(Display_Box) display_box: display box to link to this window
+			root (tkinter_window): master window of this window
+			display_box (Display_Box): display box to link to this window
 		'''
 		self.display_box = display_box
 
@@ -183,8 +183,8 @@ class Item_Deletion_Window:
 		Generates a window for item deletion with a parent window and linked display box
 		
 		Parameters:
-			(tkinter_window) root: master window of this window
-			(Display_Box) display_box: display box to link to this window
+			root (tkinter_window): master window of this window
+			display_box (Display_Box): display box to link to this window
 		'''
 		self.display_box = display_box
 
@@ -224,7 +224,7 @@ class Display_Box(Frame):
 		Generates a display box that can be placed within the tkinter grid system
 
 		Parameters:
-			master: master
+			master (tkinter_item): master of this object
 			content (list): content. format: [["item name", quantity], ...]
 		'''
 		super().__init__(master)
@@ -335,9 +335,9 @@ class Production_Path_Window:
 		Generates a window displaying detailed information about a specific production path
 
 		Parameters:
-			(tkinter_window) root: master window of this window
-			(dict) simple_production_path: the simplified production path of the provided production path
-			(dict) production_path: the production path to display the values of
+			root (tkinter_window): master window of this window
+			simple_production_path (dict): the simplified production path of the provided production path
+			production_path (dict): the production path to display the values of
 		'''
 		self.root = Toplevel(root)
 		root = self.root
@@ -391,9 +391,9 @@ class Production_Path_Tree_Window:
 		Generates a window displaying the structure of a production path's production tree
 
 		Parameters:
-			(tkinter_window) root: master window of this window
-			(dict) simple_production_path: the simplified production path of the provided production path
-			(dict) production_path: the production path to display the values of
+			root (tkinter_window): master window of this window
+			simple_production_path (dict): the simplified production path of the provided production path
+			production_path (dict): the production path to display the values of
 		'''
 		self.root = Toplevel(root)
 		root = self.root
