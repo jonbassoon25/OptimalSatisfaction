@@ -269,7 +269,7 @@ def _calc_should_del(queue, production_path_ids, production_path_data_by_id, sho
 			break
 
 		lp = len(production_path_ids)
-		print(f"starting group {i_group[0]}-{i_group[-1]}/{lp}")
+		print(f"starting group {i_group[0] + 1}-{i_group[-1] + 1}/{lp}") #print using 1 indexing
 
 		indicies_to_flip = set()
 
