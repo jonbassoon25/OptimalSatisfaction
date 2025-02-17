@@ -105,6 +105,15 @@ def split_production_tree(production_tree):
 
 
 def get_simple_production_paths(production_paths):
+	'''
+	Creates a list of simple production paths from a production paths list
+	
+	Parameters:
+		production_paths (list): production paths to generate the simple production paths for
+	
+	Returns:
+		(list): the generated simple production paths
+	'''
 	simple_production_paths = []
 	for production_branch in production_paths:
 		simple_production_paths.append({
@@ -116,6 +125,15 @@ def get_simple_production_paths(production_paths):
 
 
 def get_production_recipes(production_branch):
+	'''
+	Calculates the recipes contained in a single production branch/path
+
+	Parameters:
+		production_branch (dict): production branch to get the paths of
+	
+	Returns:
+		(list): paths of the production branch
+	'''
 	production_recipes = []
 	for key in production_branch:
 		production_recipes.append(key)
@@ -125,6 +143,15 @@ def get_production_recipes(production_branch):
 
 
 def get_inputs(production_branch):
+	'''
+	Calculates the input resources for a single production branch/path
+
+	Parameters:
+		production_branch (dict): production branch to get the inputs of
+	
+	Returns:
+		(dict): inputs of the production branch with their corresponding rates
+	'''
 	production_recipes = get_production_recipes(production_branch)
 	inputs = {}
 	for recipe in production_recipes:
@@ -138,6 +165,15 @@ def get_inputs(production_branch):
 
 
 def get_outputs(production_branch):
+	'''
+	Calculates the output resources for a single production branch/path
+
+	Parameters:
+		production_branch (dict): production branch to get the outputs of
+	
+	Returns:
+		(dict): outputs of the production branch with their corresponding rates
+	'''
 	production_recipes = get_production_recipes(production_branch)
 	inputs = {}
 	outputs = {}
@@ -167,6 +203,15 @@ def get_outputs(production_branch):
 
 
 def get_max_energy_use(production_branch):
+	'''
+	Calculates the maximum energy use for a single production branch/path
+
+	Parameters:
+		production_branch (dict): production branch to get the maximum energy use of
+	
+	Returns:
+		(number): maximum energy use of the production branch in MW
+	'''
 	production_recipes = get_production_recipes(production_branch)
 	meu = 0 #max energy use
 	for recipe in production_recipes:
@@ -175,6 +220,15 @@ def get_max_energy_use(production_branch):
 
 
 def get_construction_requirements(production_branch):
+	'''
+	Calculates the required construction resources for a single production branch/path
+
+	Parameters:
+		production_branch (dict): production branch to get the construction requirements of
+	
+	Returns:
+		(dict): construction requirements of the production branch with their corresponding values
+	'''
 	production_recieps = get_production_recipes(production_branch)
 	construction_requirements = {}
 	for recipe in production_recieps:
@@ -187,6 +241,18 @@ def get_construction_requirements(production_branch):
 
 
 def _calc_should_del(queue, production_path_ids, production_path_data_by_id, should_del, output_item, production_rate):
+	'''
+	Multiprocess compatable function to filter production paths
+	The provided queue must end with a Null value
+
+	Parameters:
+		queue (multiprocessing.Queue): The queue to pull index groups from
+		production_path_ids (list): list of production path ids
+		production_path_data_by_id (dict): production path data that can be accessed by each path's corresponding id
+		should_del (multiprocessing.Array): The linked array to flip boolean values of to indicate which paths should be deleted
+		output_item (string): Name of the output item of the paths
+		production_rate (number): Production rate of the output item of the paths
+	'''
 	while True:
 		#Set constants for the loop
 		#print("awaiting queued i-group")
@@ -242,17 +308,14 @@ def _calc_should_del(queue, production_path_ids, production_path_data_by_id, sho
 				check_inputs = check_data["inputs"]
 				check_outputs = check_data["outputs"]
 
-
 				if len(check_inputs.keys()) != branch_input_keys_length:
 					continue #Input resources cannot be the same if they are of differing lengths
 				if len(check_outputs.keys()) != branch_output_keys_length:
 					continue #Output resources cannot be the same if they are of differing lengths
 
-
 				#Check electrical consumption of this path to every other path
 				if branch_max_energy_use <= check_data["max energy"]:
 					continue #this check isn't true, so check is always false regardless of the others
-
 
 				#Check input resource types
 				broken = False
@@ -266,7 +329,6 @@ def _calc_should_del(queue, production_path_ids, production_path_data_by_id, sho
 				if broken:
 					continue #Loop was broken so the input resources of the paths are not the same
 
-
 				#Check input resource types
 				broken = False
 				for resource in branch_outputs.keys():
@@ -278,7 +340,6 @@ def _calc_should_del(queue, production_path_ids, production_path_data_by_id, sho
 						break
 				if broken:
 					continue #Loop was broken so the output resources of the paths are not the same
-
 
 				#Check construction resources of this path to every other path
 				#Null hypothesis = this branch contains less or an equal amount of each construction resource than any other path
@@ -308,6 +369,10 @@ def filter_production_paths(production_paths, output_item, production_rate, num_
 	
 	Parameters:
 		production_paths (list): list of possible production paths
+		output_item (string): Name of the output item of the paths
+		production_rate (number): Production rate of the output item of the paths
+		num_helpers (number): number of processes to use
+		group_size (number): size of the queued index groups
 	
 	Returns:
 		(list): list of filtered production paths
@@ -321,7 +386,7 @@ def filter_production_paths(production_paths, output_item, production_rate, num_
 	should_del = mp_shared_ctypes.Array(ctypes.c_bool, lp)
 
 	#precompile inputs, outputs, energy, and construction requirment values
-	print("Generating Data...")
+	print(f"Pregenerating Filter Data for {lp} Possible Production Paths...")
 	production_path_ids = []
 	production_path_data_by_id = {}
 	for production_path in production_paths:
@@ -332,21 +397,17 @@ def filter_production_paths(production_paths, output_item, production_rate, num_
 			"max energy": get_max_energy_use(production_path),
 			"construction requirements": get_construction_requirements(production_path)
 		}
-	
 
-	#use sketchy version of shared types for providing production path
-	#production_paths_id = id(production_paths)
-
-	#initialize queue
+	#initialize queue with groups of indicies for each process to calculate
 	queue = mp.Queue()
 	for i in range(0, len(production_paths), group_size):
 		queue.put(tuple(range(i, min(len(production_paths), i + group_size))))
 	
-	queue.put(None)
+	queue.put(None) #flag for detection of queue end
 
-	#'''
+	#--------------------
+
 	#generate processes
-	print(num_helpers)
 	processes = []
 	for i in range(num_helpers):
 		processes.append(mp.Process(target=_calc_should_del, args=(queue, production_path_ids, production_path_data_by_id, should_del, output_item, production_rate)))
@@ -359,23 +420,35 @@ def filter_production_paths(production_paths, output_item, production_rate, num_
 	#join processes
 	for process in processes:
 		process.join()
-
-	#'''
 	
-	if len(processes) == 0:
+	#--------------------
+
+	if len(processes) == 0: #if there were no other processes to run the filter computations, do it on the main thread
 		_calc_should_del(queue, production_path_ids, production_path_data_by_id, should_del, output_item, production_rate)
 
-	del_count = 0
-
+	#remove paths that have been filtered out
 	for i in range(len(should_del) - 1, -1, -1):
 		if should_del[i]:
-			del_count += 1
 			del production_paths[i]
 
 	return production_paths
 
-#["resource efficiency", "input resources", "byproducts", "electrical consumption", "construction cost"]
+
 def sort_production_paths(production_paths, output_resource_name, order_of_importance, input_resources, resource_efficiency_determinator = "ratio", construction_cost_determinator = "sink"):
+	'''
+	Sorts a production paths list based on the given order of importance
+
+	Parameters:
+		production_paths (list): list of possible production paths
+		output_resource_name (string): Name of the output item of the paths
+		order_of_importance (list): Sort order (will weight paths based on first element, then sorts those of the same weight by the next element and so on)
+		input_resources (dict): Input resources dictionary
+		resource_efficiency_determinator (string): efficiency determinator for resource efficiency weight
+		construction_cost_determinator (string): efficiency determinator for construction cost weight
+
+	Returns:
+		(list): sorted production paths
+	'''
 	#Convert order of importance strings to functions
 	weight_order = []
 	for i in range(len(order_of_importance)):
@@ -398,6 +471,16 @@ def sort_production_paths(production_paths, output_resource_name, order_of_impor
 	
 
 def _get_sorted_production_paths(production_paths, ordered_weight_lambdas):
+	'''
+	Sorts production paths based on a list of ordered weight lambdas
+
+	Parameters:
+		production_paths (list): list of production paths to sort
+		ordered_weight_lambdas (list): list of ordered weight lambdas to use to determine sorting weights
+
+	Returns:
+		(list): sorted production paths
+	'''
 	production_paths_by_weight = {}
 
 	#get path weights
@@ -456,6 +539,16 @@ def _get_sorted_production_paths(production_paths, ordered_weight_lambdas):
 			
 
 def _get_resource_efficiency_weight(production_path, efficiency_determinator = "ratio"):
+	'''
+	Calculates the resource efficiency weight of a production path
+
+	Parameters:
+		production_path (dict): path to determine the weight of
+		efficiency_determinator (string): method of determining efficiency weight
+	
+	Returns:
+		(number): weight of the path (lower is better)
+	'''
 	#efficiency level determined by ratio of input resources in the world, commonality of input resource in the world, or sink value of input resources
 	inputs = get_inputs(production_path)
 	weight = 0
@@ -467,6 +560,16 @@ def _get_resource_efficiency_weight(production_path, efficiency_determinator = "
 
 
 def _get_input_weight(production_path, input_resources):
+	'''
+	Calculates the input utilization weight of a production path
+
+	Parameters:
+		production_path (dict): path to determine the weight of
+		input_resources (dict): player provided input resources
+	
+	Returns:
+		(number): weight of the path (lower is better)
+	'''
 	#based on avg proportion of input resources used
 	inputs = get_inputs(production_path)
 	input_resources = input_resources.copy()
@@ -483,6 +586,16 @@ def _get_input_weight(production_path, input_resources):
 
 
 def _get_byproduct_weight(production_path, output_resource_name):
+	'''
+	Calculates the byproduct weight of a production path
+
+	Parameters:
+		production_path (dict): path to determine the weight of
+		output_resource_name (string): name of the desired output resource of the production path
+	
+	Returns:
+		(number): weight of the path (lower is better)
+	'''
 	#based on sink value of byproducts
 	outputs = get_outputs(production_path)
 	weight = 0
@@ -495,10 +608,29 @@ def _get_byproduct_weight(production_path, output_resource_name):
 
 
 def _get_electrical_consumption_weight(production_path):
+	'''
+	Calculates the electrical consumption weight of a production path
+
+	Parameters:
+		production_path (dict): path to determine the weight of
+	
+	Returns:
+		(number): weight of the path (lower is better)
+	'''
 	return get_max_energy_use(production_path)
 
 
 def _get_construction_efficiency_weight(production_path, cost_determinator = "sink"):
+	'''
+	Calculates the construction efficiency weight of a production path
+
+	Parameters:
+		production_path (dict): path to determine the weight of
+		cost_determinator (string): method of determining efficiency weight
+	
+	Returns:
+		(number): weight of the path (lower is better)
+	'''
 	#efficiency level determined by sink value of each construction resource, for now
 	construction_requirements = get_construction_requirements(production_path)
 	weight = 0
@@ -509,6 +641,16 @@ def _get_construction_efficiency_weight(production_path, cost_determinator = "si
 
 
 def _get_resource_weight(resource_name, determinator):
+	'''
+	Calculates the weight value for a resource
+
+	Parameters:
+		resource_name (string): name of the resource to calculate the weight of
+		determinator (string): method of calculating the weight
+	
+	Returns:
+		(number): weight of the resource (lower means more common)
+	'''
 	if determinator == "ratio":
 		if not resource_name in Resource_Data.resource_ratios:
 			return 0 #input resources not in the ratios table are either supplied by player or are water
@@ -528,6 +670,7 @@ def _get_resource_weight(resource_name, determinator):
 
 
 if __name__ == "__main__":
+	#Test Case
 	item_name = "Plastic"
 	quantity = 10 #per min
 
